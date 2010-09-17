@@ -1,9 +1,9 @@
 REQUIREMENTS
 =====
 
-COMMAND LINE ARGUMENTS
+CONSTRUCTOR
 -----
-Take the following arguments on the command line
+Take the following arguments on the constructor
  - connStr: database connection string
  - noDrop: this tells the program not to drop objects (SP's, views, functions) before running scripts
  - scripts: the path to the directory containing the scripts to run
@@ -56,5 +56,5 @@ Scripts will not manipulate the VersionHistory table - the program will take car
 
 NOTES
 -----
-otherDirs - must loop through the directories listed here in order
-not dependent on a specific database - decoupled from actual DB code, however an implementation of the interface used will be written to interface with MS SQL
+not dependent on a specific database - decoupled from actual DB code, however an implementation of the interface used will be written to interface with MS SQL.
+class library, but a front end command line program will be written to call the class library and display output.
