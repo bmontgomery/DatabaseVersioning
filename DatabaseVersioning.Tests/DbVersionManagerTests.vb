@@ -136,7 +136,21 @@ Public Class DbVersionManagerTests
 
   <Test()> _
   Public Sub Mgr_Go_RunsScripts()
-    Throw New NotImplementedException()
+
+    'Arrange
+
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
+  Public Sub Mgr_Go_RunsScriptsInOrderOfVersion()
+    Throw New ApplicationException()
   End Sub
 
   <Test()> _
