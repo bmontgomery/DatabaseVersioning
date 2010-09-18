@@ -8,19 +8,19 @@ Public Class DbVersionManagerTests
   Dim mockDbProvider As IDatabaseProvider
   Dim dbVerMgr As DbVersionManager
 
-  Private Const connStr As String = "server=.\SQLEXPRESS;database=Test"
-  Private Const drop As Boolean = True
-  Private Const scriptsDir As String = "C:\DbScriptsTest"
-  Private Const otherDir1 As String = "C:\DbViews"
-  Private Const otherDir2 As String = "C:\DbFunctions"
-  Private Const otherDir3 As String = "C:\DbSPs"
+  Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
+  Private Const DROP As Boolean = True
+  Private Const SCRIPTS_DIR As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
+  Private Const OTHER_DIR1 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
+  Private Const OTHER_DIR2 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
+  Private Const OTHER_DIR3 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
 
   <SetUp()> _
   Public Sub SetupTest()
 
     mockery = New MockRepository()
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
-    dbVerMgr = New DbVersionManager(connStr, drop, scriptsDir)
+    dbVerMgr = New DbVersionManager(CONN_STR, DROP, SCRIPTS_DIR)
     dbVerMgr.DatabaseProvider = mockDbProvider
 
   End Sub
