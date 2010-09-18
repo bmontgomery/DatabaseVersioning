@@ -1,19 +1,19 @@
 ﻿Public Interface IDatabaseProvider
 
-  Sub InitDatabaseConnection(ByVal connStr As String)
-  Sub CloseDatabaseConnection()
+  Function InitDatabaseConnection(ByVal connStr As String)
+  Function CloseDatabaseConnection()
 
-  Sub BeginTransaction()
-  Sub RollBackTransaction()
-  Sub CommitTransaction()
+  Function BeginTransaction()
+  Function RollBackTransaction()
+  Function CommitTransaction()
 
-  Sub CreateDatabase()
+  Function CreateDatabase()
 
-  Sub EnsureVersionHistoryTableExists()
+  Function EnsureVersionHistoryTableExists()
 
   Function GetDatabaseVersion() As Version
-  Sub DropItems()
-  Sub RunScript(ByVal scriptText As String)
-  Sub UpdateVersion(ByVal scriptName As String, ByVal version As Version, ByVal dateApplied As DateTime)
+  Function DropItems()
+  Function RunScript(ByVal scriptText As String)
+  Function UpdateVersion(ByVal scriptName As String, ByVal version As Version, ByVal dateApplied As DateTime)
 
 End Interface

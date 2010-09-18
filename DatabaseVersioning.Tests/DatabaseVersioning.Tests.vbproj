@@ -62,7 +62,7 @@
     <Import Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.vb" />
+    <Compile Include="DbVersionManagerTests.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -101,6 +101,12 @@
   <ItemGroup>
     <Content Include="lib\nunit.framework.dll" />
     <Content Include="lib\Rhino.Mocks.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DatabaseVersioning\DatabaseVersioning.vbproj">
+      <Project>{8EB5E493-1B5B-4721-A3D5-123D4339B660}</Project>
+      <Name>DatabaseVersioning</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

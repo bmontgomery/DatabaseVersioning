@@ -59,4 +59,24 @@
 
   End Sub
 
+  Public Sub Go()
+
+    DatabaseProvider.BeginTransaction()
+
+    Try
+
+      DatabaseProvider.EnsureVersionHistoryTableExists()
+
+      If mDrop Then DatabaseProvider.DropItems()
+
+      DatabaseProvider.CommitTransaction()
+
+    Catch ex As Exception
+
+      DatabaseProvider.RollBackTransaction()
+
+    End Try
+    
+  End Sub
+
 End Class
