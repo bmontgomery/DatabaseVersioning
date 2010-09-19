@@ -14,6 +14,6 @@
   Function GetDatabaseVersion() As Version
   Function DropItems()
   Function RunScript(ByVal scriptText As String)
-  Function UpdateVersion(ByVal scriptName As String, ByVal version As Version, ByVal dateApplied As DateTime)
+  Function UpdateVersion(ByVal scriptName As String, ByVal version As Version)
 
 End Interface

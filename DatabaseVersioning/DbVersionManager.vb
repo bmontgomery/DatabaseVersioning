@@ -69,6 +69,24 @@
 
       If mDrop Then DatabaseProvider.DropItems()
 
+      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+
+        DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+
+        Dim major As Int32 = 0
+        Dim minor As Int32 = 0
+        Dim build As Int32 = 0
+        Dim revision As Int32 = 0
+        Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
+        Int32.TryParse(versionStringSplit(0), major)
+        If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)
+        If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
+        If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
+
+        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(filePath), New Version(major, minor, build, revision))
+
+      Next
+
       DatabaseProvider.CommitTransaction()
 
     Catch ex As Exception
