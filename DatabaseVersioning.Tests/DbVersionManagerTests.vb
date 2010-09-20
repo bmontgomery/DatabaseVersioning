@@ -20,7 +20,7 @@ Public Class DbVersionManagerTests
 
     mockery = New MockRepository()
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
-    dbVerMgr = New DbVersionManager(CONN_STR, DROP, SCRIPTS_DIR)
+    dbVerMgr = New DbVersionManager(CONN_STR, DROP, SCRIPTS_DIR, OTHER_DIR1, OTHER_DIR2, OTHER_DIR3)
     dbVerMgr.DatabaseProvider = mockDbProvider
 
   End Sub
@@ -176,12 +176,59 @@ Public Class DbVersionManagerTests
 
   <Test()> _
   Public Sub Mgr_Go_RunsOtherScriptsAfterScripts()
-    Throw New NotImplementedException()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True).Repeat.Times(5)
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.UpdateVersion("", Nothing)).IgnoreArguments().Return(True).Repeat.Times(5)
+
+    Using mockery.Ordered()
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True).Repeat.Times(12)
+    End Using
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
   Public Sub Mgr_Go_RunsOtherDirScriptsInOrder()
-    Throw New NotImplementedException()
+
+    'Arrange
+    Using mockery.Ordered()
+
+      'Views
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--view 1")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--view 2")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--view 3")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--view 4")).Return(True)
+
+      'Functions
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--function 1")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--function 2")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--function 3")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--function 4")).Return(True)
+
+      'Stored procedures
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--stored procedure 1")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--stored procedure 2")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--stored procedure 3")).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--stored procedure 4")).Return(True)
+
+    End Using
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _

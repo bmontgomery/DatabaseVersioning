@@ -69,6 +69,7 @@
 
       If mDrop Then DatabaseProvider.DropItems()
 
+      'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
       For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
@@ -93,6 +94,15 @@
 
         DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
         DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+
+      Next
+
+      'Other script directories
+      For Each otherDir As String In OtherDirectories
+
+        For Each filePath As String In IO.Directory.GetFiles(otherDir)
+          DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+        Next
 
       Next
 
