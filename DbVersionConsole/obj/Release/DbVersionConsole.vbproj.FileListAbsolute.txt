@@ -1,9 +1,0 @@
-C:\Source Code\DatabaseVersioning\DbVersionConsole\bin\Release\DbVersionConsole.exe
-C:\Source Code\DatabaseVersioning\DbVersionConsole\bin\Release\DbVersionConsole.pdb
-C:\Source Code\DatabaseVersioning\DbVersionConsole\bin\Release\DbVersionConsole.xml
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\ResolveAssemblyReference.cache
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\DbVersion.Resources.resources
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\DbVersionConsole.vbproj.GenerateResource.Cache
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\DbVersionConsole.exe
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\DbVersionConsole.xml
-C:\Source Code\DatabaseVersioning\DbVersionConsole\obj\Release\DbVersionConsole.pdb

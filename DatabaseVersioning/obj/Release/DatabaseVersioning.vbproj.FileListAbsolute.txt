@@ -1,9 +1,0 @@
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\bin\Release\DatabaseVersioning.dll
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\bin\Release\DatabaseVersioning.pdb
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\bin\Release\DatabaseVersioning.xml
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\ResolveAssemblyReference.cache
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\DatabaseVersioning.Resources.resources
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\DatabaseVersioning.vbproj.GenerateResource.Cache
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\DatabaseVersioning.dll
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\DatabaseVersioning.xml
-C:\Source Code\DatabaseVersioning\DatabaseVersioning\obj\Release\DatabaseVersioning.pdb
