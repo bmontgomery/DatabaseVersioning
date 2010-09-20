@@ -154,12 +154,16 @@ Public Class DbVersionManagerTests
   Public Sub Mgr_Go_RunsScriptsInOrderOfVersion()
 
     'Arrange
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
+    Using mockery.Ordered()
 
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
+
+    End Using
+    
     mockery.ReplayAll()
 
     'Action
