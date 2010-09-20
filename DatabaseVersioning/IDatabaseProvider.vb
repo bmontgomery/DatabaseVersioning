@@ -7,6 +7,7 @@
   Function RollBackTransaction()
   Function CommitTransaction()
 
+  Function DatabaseExists() As Boolean
   Function CreateDatabase()
 
   Function EnsureVersionHistoryTableExists()

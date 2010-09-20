@@ -50,6 +50,16 @@
     End Set
   End Property
 
+  Private mErrorMessage As String
+  Public Property ErrorMessage() As String
+    Get
+      Return mErrorMessage
+    End Get
+    Set(ByVal value As String)
+      mErrorMessage = value
+    End Set
+  End Property
+
   Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal ParamArray otherDirs As String())
 
     mConnectionString = connectionString
@@ -65,7 +75,11 @@
 
     Try
 
+      If Not DatabaseProvider.DatabaseExists() Then DatabaseProvider.CreateDatabase()
+
       DatabaseProvider.EnsureVersionHistoryTableExists()
+
+      Dim currentDbVersion As Version = DatabaseProvider.GetDatabaseVersion()
 
       If mDrop Then DatabaseProvider.DropItems()
 
@@ -84,7 +98,8 @@
         If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
         If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
 
-        versionedFiles.Add(New VersionedScriptFile(New Version(major, minor, build, revision), filePath))
+        Dim fileVersion As Version = New Version(major, minor, build, revision)
+        If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
 
       Next
 
@@ -111,6 +126,7 @@
     Catch ex As Exception
 
       DatabaseProvider.RollBackTransaction()
+      mErrorMessage = ex.Message
 
     End Try
     

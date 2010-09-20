@@ -62,6 +62,8 @@ Public Class DbVersionManagerTests
   Public Sub MgrGo_Succeeds_CommitsTransaction()
 
     'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CommitTransaction()).Return(True)
 
     mockery.ReplayAll()
@@ -75,13 +77,53 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
+  Public Sub Mgr_Go_ChecksForDatabaseExistence()
+
+    'Arrange
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
   Public Sub MgrGo_NoDatabase_CreatesDatabase()
-    Throw New NotImplementedException()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
   Public Sub MgrGo_DatabaseExists_DoesNotCreateDatabase()
-    Throw New NotImplementedException()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Repeat.Never()
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
@@ -138,7 +180,9 @@ Public Class DbVersionManagerTests
   Public Sub Mgr_Go_RunsScripts()
 
     'Arrange
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True).Repeat.Times(5, 5)
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True)
 
     mockery.ReplayAll()
 
@@ -154,6 +198,8 @@ Public Class DbVersionManagerTests
   Public Sub Mgr_Go_RunsScriptsInOrderOfVersion()
 
     'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
     Using mockery.Ordered()
 
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
@@ -163,7 +209,7 @@ Public Class DbVersionManagerTests
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
 
     End Using
-    
+
     mockery.ReplayAll()
 
     'Action
@@ -178,6 +224,7 @@ Public Class DbVersionManagerTests
   Public Sub Mgr_Go_RunsOtherScriptsAfterScripts()
 
     'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True).Repeat.Times(5)
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.UpdateVersion("", Nothing)).IgnoreArguments().Return(True).Repeat.Times(5)
 
@@ -199,6 +246,8 @@ Public Class DbVersionManagerTests
   Public Sub Mgr_Go_RunsOtherDirScriptsInOrder()
 
     'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
     Using mockery.Ordered()
 
       'Views
@@ -233,22 +282,65 @@ Public Class DbVersionManagerTests
 
   <Test()> _
   Public Sub MgrGo_FreshDatabase_RunsAllScripts()
-    Throw New NotImplementedException()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True).Repeat.Times(5)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
   Public Sub MgrGo_PartiallyUpdatedDatabase_RunsOnlyNecessaryScripts()
-    Throw New NotImplementedException()
-  End Sub
 
-  <Test()> _
-  Public Sub Mgr_Go_UpdatesVersionForEachScript()
-    Throw New NotImplementedException()
+    'Arrange
+    Dim strictDbProvider As IDatabaseProvider = mockery.StrictMock(Of IDatabaseProvider)()
+    dbVerMgr.DatabaseProvider = strictDbProvider
+
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.BeginTransaction()).Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DropItems()).Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(1, 0, 0, 3))
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists()).Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CommitTransaction()).Return(True)
+
+    strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
+    strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
   Public Sub MgrGo_Errors_ReturnsErrorMessage()
-    Throw New NotImplementedException()
+
+    'Arrange
+    Dim testErrorMessage As String = "Test error message"
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Throw(New ApplicationException(testErrorMessage))
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    Assert.AreEqual(testErrorMessage, dbVerMgr.ErrorMessage)
+
   End Sub
 
 End Class
