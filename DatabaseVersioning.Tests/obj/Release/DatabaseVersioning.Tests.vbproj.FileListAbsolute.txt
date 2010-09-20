@@ -1,0 +1,14 @@
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.Tests.dll
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.Tests.pdb
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.Tests.xml
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.dll
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\nunit.framework.dll
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\Rhino.Mocks.dll
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.pdb
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\bin\Release\DatabaseVersioning.xml
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\ResolveAssemblyReference.cache
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\DatabaseVersioning.Tests.Resources.resources
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\DatabaseVersioning.Tests.vbproj.GenerateResource.Cache
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\DatabaseVersioning.Tests.dll
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\DatabaseVersioning.Tests.xml
+C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\obj\Release\DatabaseVersioning.Tests.pdb

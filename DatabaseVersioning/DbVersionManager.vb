@@ -69,9 +69,9 @@
 
       If mDrop Then DatabaseProvider.DropItems()
 
-      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+      Dim versionedFiles As New List(Of VersionedScriptFile)
 
-        DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
 
         Dim major As Int32 = 0
         Dim minor As Int32 = 0
@@ -83,7 +83,16 @@
         If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
         If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
 
-        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(filePath), New Version(major, minor, build, revision))
+        versionedFiles.Add(New VersionedScriptFile(New Version(major, minor, build, revision), filePath))
+
+      Next
+
+      Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
+
+      For Each scriptFile As VersionedScriptFile In orderedFilePaths
+
+        DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
 
       Next
 
