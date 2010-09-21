@@ -1,6 +1,6 @@
 ﻿Public Interface IDatabaseProvider
 
-  Function InitDatabaseConnection(ByVal connStr As String)
+  Function OpenDatabaseConnection(ByVal connStr As String)
   Function CloseDatabaseConnection()
 
   Function BeginTransaction()

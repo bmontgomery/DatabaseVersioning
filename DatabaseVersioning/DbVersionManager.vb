@@ -71,6 +71,8 @@
 
   Public Sub Go()
 
+    DatabaseProvider.OpenDatabaseConnection(mConnectionString)
+
     DatabaseProvider.BeginTransaction()
 
     Try
@@ -128,8 +130,10 @@
       DatabaseProvider.RollBackTransaction()
       mErrorMessage = ex.Message
 
+    Finally
+      DatabaseProvider.CloseDatabaseConnection()
     End Try
-    
+
   End Sub
 
 End Class

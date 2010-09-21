@@ -10,10 +10,10 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_DIR As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
-  Private Const OTHER_DIR1 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
-  Private Const OTHER_DIR2 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
-  Private Const OTHER_DIR3 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
+  Private Const SCRIPTS_DIR As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
+  Private Const OTHER_DIR1 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
+  Private Const OTHER_DIR2 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
+  Private Const OTHER_DIR3 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
 
   <SetUp()> _
   Public Sub SetupTest()
@@ -22,6 +22,55 @@ Public Class DbVersionManagerTests
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
     dbVerMgr = New DbVersionManager(CONN_STR, DROP, SCRIPTS_DIR, OTHER_DIR1, OTHER_DIR2, OTHER_DIR3)
     dbVerMgr.DatabaseProvider = mockDbProvider
+
+  End Sub
+
+  <Test()> _
+  Public Sub Mgr_Go_OpensDatabaseConnection()
+
+    'Arrange
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.OpenDatabaseConnection(CONN_STR)).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
+  Public Sub MgrGo_Success_ClosesDatabaseConnection()
+
+    'Arrange
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
+  Public Sub MgrGo_Errors_ClosesDatabaseConnection()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists()).Throw(New ApplicationException(""))
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
 
   End Sub
 
@@ -304,6 +353,7 @@ Public Class DbVersionManagerTests
     Dim strictDbProvider As IDatabaseProvider = mockery.StrictMock(Of IDatabaseProvider)()
     dbVerMgr.DatabaseProvider = strictDbProvider
 
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.OpenDatabaseConnection(CONN_STR)).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.BeginTransaction()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DropItems()).Return(True)
@@ -311,6 +361,7 @@ Public Class DbVersionManagerTests
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CommitTransaction()).Return(True)
+    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
 
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
