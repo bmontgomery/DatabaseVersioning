@@ -10,10 +10,10 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_DIR As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
-  Private Const OTHER_DIR1 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
-  Private Const OTHER_DIR2 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
-  Private Const OTHER_DIR3 As String = "C:\Projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
+  Private Const SCRIPTS_DIR As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
+  Private Const OTHER_DIR1 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
+  Private Const OTHER_DIR2 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
+  Private Const OTHER_DIR3 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
 
   <SetUp()> _
   Public Sub SetupTest()
