@@ -28,6 +28,59 @@ Public Class MsSqlDatabaseProvider
 
   Public Function DropItems() As Object Implements IDatabaseProvider.DropItems
 
+    Dim sql As New Text.StringBuilder()
+
+    '--sps
+    sql.AppendLine("Declare @procName varchar(500)")
+    sql.AppendLine("Declare @procs cursor	")
+    sql.AppendLine("Set @procs = Cursor For Select name From sysobjects Where type = 'P' and category = '0'")
+
+    sql.AppendLine("Open @procs")
+    sql.AppendLine("Fetch Next From @procs Into @procName")
+
+    sql.AppendLine("While @@FETCH_STATUS = 0 Begin")
+    sql.AppendLine("	If @procName <> '' Exec('DROP PROCEDURE [' + @procName + ']')")
+    sql.AppendLine("	Fetch Next From @procs Into @procName")
+    sql.AppendLine("End")
+
+    sql.AppendLine("Close @procs")
+    sql.AppendLine("Deallocate @procs")
+
+    '--functions
+    sql.AppendLine("Declare @functionName varchar(500)")
+    sql.AppendLine("Declare @functions cursor	")
+    sql.AppendLine("Set @functions = Cursor For Select name From sysobjects Where type = 'P' and category = '0'")
+
+    sql.AppendLine("Open @functions")
+    sql.AppendLine("Fetch Next From @functions Into @functionName")
+
+    sql.AppendLine("While @@FETCH_STATUS = 0 Begin")
+    sql.AppendLine("	If @functionName <> '' Exec('DROP PROCEDURE [' + @functionName + ']')")
+    sql.AppendLine("	Fetch Next From @functions Into @functionName")
+    sql.AppendLine("End")
+
+    sql.AppendLine("Close @functions")
+    sql.AppendLine("Deallocate @functions")
+
+    '--views
+    sql.AppendLine("Declare @viewName varchar(500)")
+    sql.AppendLine("Declare @views cursor	")
+    sql.AppendLine("Set @views = Cursor For Select name From sysobjects Where type = 'V' and category = '0'")
+
+    sql.AppendLine("Open @views")
+    sql.AppendLine("Fetch Next From @views Into @viewName")
+
+    sql.AppendLine("While @@FETCH_STATUS = 0 Begin")
+    sql.AppendLine("	If @viewName <> '' Exec('DROP PROCEDURE [' + @viewName + ']')")
+    sql.AppendLine("	Fetch Next From @views Into @viewName")
+    sql.AppendLine("End")
+
+    sql.AppendLine("Close @views")
+    sql.AppendLine("Deallocate @views")
+
+    Dim dropItemsCommand As New SqlCommand(sql.ToString(), connection, transaction)
+    dropItemsCommand.ExecuteNonQuery()
+
   End Function
 
   Public Function EnsureVersionHistoryTableExists() As Object Implements IDatabaseProvider.EnsureVersionHistoryTableExists

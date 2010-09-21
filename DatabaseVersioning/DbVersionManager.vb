@@ -88,20 +88,24 @@
       'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
-      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory, "*.sql")
+      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
 
-        Dim major As Int32 = 0
-        Dim minor As Int32 = 0
-        Dim build As Int32 = 0
-        Dim revision As Int32 = 0
-        Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
-        Int32.TryParse(versionStringSplit(0), major)
-        If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)
-        If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
-        If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
+        If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
 
-        Dim fileVersion As Version = New Version(major, minor, build, revision)
-        If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+          Dim major As Int32 = 0
+          Dim minor As Int32 = 0
+          Dim build As Int32 = 0
+          Dim revision As Int32 = 0
+          Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
+          Int32.TryParse(versionStringSplit(0), major)
+          If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)
+          If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
+          If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
+
+          Dim fileVersion As Version = New Version(major, minor, build, revision)
+          If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+
+        End If
 
       Next
 
@@ -119,8 +123,8 @@
 
         For Each otherDir As String In OtherDirectories
 
-          For Each filePath As String In IO.Directory.GetFiles(otherDir)
-            DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+          For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
+            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
           Next
 
         Next
