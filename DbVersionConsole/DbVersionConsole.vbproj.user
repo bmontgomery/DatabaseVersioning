@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-connStr "Data Source=.\SQLEXPRESS;Initial Catalog=Upgradable;User Id=sa;Password=j624890o;"</StartArguments>
+    <StartArguments>-connStr "Data Source=.\SQLEXPRESS;Initial Catalog=Upgradable;User Id=sa;Password=j624890o;" -scriptsDir "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\Scripts"</StartArguments>
   </PropertyGroup>
 </Project>

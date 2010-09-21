@@ -64,10 +64,10 @@ Public Class MsSqlDatabaseProvider
     sql.AppendLine("From")
     sql.AppendLine("	VersionHistory")
     sql.AppendLine("Order By")
-    sql.AppendLine("	VH_Major,")
-    sql.AppendLine("	VH_Minor,")
-    sql.AppendLine("	VH_Build,")
-    sql.AppendLine("	VH_Revision")
+    sql.AppendLine("	VH_Major DESC,")
+    sql.AppendLine("	VH_Minor DESC,")
+    sql.AppendLine("	VH_Build DESC,")
+    sql.AppendLine("	VH_Revision DESC")
 
     Dim major As Int32 = 0
     Dim minor As Int32 = 0
@@ -105,10 +105,33 @@ Public Class MsSqlDatabaseProvider
 
   Public Function RunScript(ByVal scriptText As String) As Object Implements IDatabaseProvider.RunScript
 
+    Dim scriptCommand As New SqlCommand(scriptText, connection, transaction)
+    scriptCommand.ExecuteNonQuery()
+
   End Function
 
   Public Function UpdateVersion(ByVal scriptName As String, ByVal version As System.Version) As Object Implements IDatabaseProvider.UpdateVersion
 
+    Dim sql As New Text.StringBuilder()
+    sql.AppendLine("INSERT INTO VersionHistory (")
+    sql.AppendLine("  VH_FileName,")
+    sql.AppendLine("  VH_DateApplied,")
+    sql.AppendLine("  VH_Major,")
+    sql.AppendLine("  VH_Minor,")
+    sql.AppendLine("  VH_Build,")
+    sql.AppendLine("  VH_Revision")
+    sql.AppendLine(") VALUES (")
+    sql.AppendFormat("  '{0}'," + Environment.NewLine, scriptName.Replace("'", "''"))
+    sql.AppendLine("  getdate(),")
+    sql.AppendFormat("  {0}," + Environment.NewLine, version.Major)
+    sql.AppendFormat("  {0}," + Environment.NewLine, version.Minor)
+    sql.AppendFormat("  {0}," + Environment.NewLine, version.Build)
+    sql.AppendFormat("  {0}" + Environment.NewLine, version.Revision)
+    sql.AppendLine(");")
+
+    Dim updateVersionCommand As New SqlCommand(sql.ToString(), connection, transaction)
+    updateVersionCommand.ExecuteNonQuery()
+    
   End Function
 
 End Class

@@ -244,6 +244,24 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
+  Public Sub Mgr_Go_RunsOnlySqlScripts()
+
+    'Arrange
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.1.txt", New Version(1, 0, 0, 1))).Repeat.Never()
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Go()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
   Public Sub Mgr_Go_RunsScriptsInOrderOfVersion()
 
     'Arrange

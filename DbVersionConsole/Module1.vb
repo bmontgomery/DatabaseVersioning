@@ -24,7 +24,9 @@ Module Module1
     dbVerMgr.Go()
 
     If Not String.IsNullOrEmpty(dbVerMgr.ErrorMessage) Then
-      Console.Write(dbVerMgr.ErrorMessage)
+      Console.WriteLine(dbVerMgr.ErrorMessage)
+    Else
+      Console.WriteLine("Database upgraded succesfully.")
     End If
 
     Console.ReadKey()

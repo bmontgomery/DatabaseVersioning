@@ -88,7 +88,7 @@
       'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
-      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory, "*.sql")
 
         Dim major As Int32 = 0
         Dim minor As Int32 = 0
@@ -115,14 +115,18 @@
       Next
 
       'Other script directories
-      For Each otherDir As String In OtherDirectories
+      If OtherDirectories IsNot Nothing Then
 
-        For Each filePath As String In IO.Directory.GetFiles(otherDir)
-          DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+        For Each otherDir As String In OtherDirectories
+
+          For Each filePath As String In IO.Directory.GetFiles(otherDir)
+            DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+          Next
+
         Next
 
-      Next
-
+      End If
+      
       DatabaseProvider.CommitTransaction()
 
     Catch ex As Exception
