@@ -60,6 +60,8 @@
     End Set
   End Property
 
+  Public Event MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
+
   Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal ParamArray otherDirs As String())
 
     mConnectionString = connectionString
@@ -71,24 +73,43 @@
 
   Public Sub Go()
 
+    RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Opening database connection", .DateLogged = Now})
     DatabaseProvider.OpenDatabaseConnection(mConnectionString)
 
+    RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Beginning transaction", .DateLogged = Now})
     DatabaseProvider.BeginTransaction()
 
     Try
 
-      If Not DatabaseProvider.DatabaseExists() Then DatabaseProvider.CreateDatabase()
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Checking for existence of database", .DateLogged = Now})
+      If Not DatabaseProvider.DatabaseExists() Then
 
+        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Creating database", .DateLogged = Now})
+        DatabaseProvider.CreateDatabase()
+
+      End If
+
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Ensuring existence of version history table", .DateLogged = Now})
       DatabaseProvider.EnsureVersionHistoryTableExists()
 
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Getting current database version", .DateLogged = Now})
       Dim currentDbVersion As Version = DatabaseProvider.GetDatabaseVersion()
 
-      If mDrop Then DatabaseProvider.DropItems()
+      If mDrop Then
+
+        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Dropping items", .DateLogged = Now})
+        DatabaseProvider.DropItems()
+
+      End If
+
+      Dim latestVersion As Version = currentDbVersion
 
       'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
       If ScriptsDirectory IsNot Nothing Then
+
+        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Examining scripts directory for .sql files", .DateLogged = Now})
         For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
 
           If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
@@ -103,10 +124,17 @@
         'Run the scripts in order
         Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
 
+
         For Each scriptFile As VersionedScriptFile In orderedFilePaths
+
+          RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", .DateLogged = Now})
 
           DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
           DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+
+          RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", .DateLogged = Now})
+
+          If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
 
         Next
 
@@ -118,14 +146,26 @@
         For Each otherDir As String In OtherDirectories
 
           For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
-            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+
+            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+
+              RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Running other script """ + IO.Path.GetFileName(filePath) + """", .DateLogged = Now})
+              DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+              RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Success", .DateLogged = Now})
+
+            End If
+
           Next
 
         Next
 
       End If
 
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Committing transaction", .DateLogged = Now})
+
       DatabaseProvider.CommitTransaction()
+
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Transaction committed. Database upgraded to version " + latestVersion.ToString() + " successfully.", .DateLogged = Now})
 
     Catch ex As Exception
 
@@ -133,7 +173,11 @@
       mErrorMessage = ex.Message
 
     Finally
+
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Closing database connection", .DateLogged = Now})
       DatabaseProvider.CloseDatabaseConnection()
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Database connection closed", .DateLogged = Now})
+
     End Try
 
   End Sub

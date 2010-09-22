@@ -158,7 +158,7 @@ Public Class MsSqlDatabaseProvider
 
   Public Function RunScript(ByVal scriptText As String) As Object Implements IDatabaseProvider.RunScript
 
-    'If there are GO statements we need to split those statements up.
+    'If there are GO statements we need to split those statements up into separate commands, or else there will be errors.
     Dim commands As String() = Text.RegularExpressions.Regex.Split(scriptText, "^\s*go\s*$", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Multiline)
 
     For Each commandText As String In commands

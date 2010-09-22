@@ -21,6 +21,8 @@ Module Module1
 
     InitDbVersionManager()
 
+    AddHandler dbVerMgr.MessageLogged, AddressOf MessageLogged
+
     dbVerMgr.Go()
 
     If Not String.IsNullOrEmpty(dbVerMgr.ErrorMessage) Then
@@ -29,6 +31,10 @@ Module Module1
       Console.WriteLine("Database upgraded succesfully.")
     End If
 
+  End Sub
+
+  Private Sub MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
+    Console.WriteLine(e.Message)
   End Sub
 
   Private Sub GenerateCommandLineArgDefinitions()
