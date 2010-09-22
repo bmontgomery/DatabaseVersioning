@@ -88,35 +88,29 @@
       'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
-      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+      If ScriptsDirectory IsNot Nothing Then
+        For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
 
-        If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+          If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
 
-          Dim major As Int32 = 0
-          Dim minor As Int32 = 0
-          Dim build As Int32 = 0
-          Dim revision As Int32 = 0
-          Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
-          Int32.TryParse(versionStringSplit(0), major)
-          If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)
-          If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
-          If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
+            Dim fileVersion As Version = GetVersionFromFilePath(filePath)
+            If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
 
-          Dim fileVersion As Version = New Version(major, minor, build, revision)
-          If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+          End If
 
-        End If
+        Next
 
-      Next
+        'Run the scripts in order
+        Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
 
-      Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
+        For Each scriptFile As VersionedScriptFile In orderedFilePaths
 
-      For Each scriptFile As VersionedScriptFile In orderedFilePaths
+          DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+          DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
 
-        DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
-        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+        Next
 
-      Next
+      End If
 
       'Other script directories
       If OtherDirectories IsNot Nothing Then
@@ -130,7 +124,7 @@
         Next
 
       End If
-      
+
       DatabaseProvider.CommitTransaction()
 
     Catch ex As Exception
@@ -143,5 +137,23 @@
     End Try
 
   End Sub
+
+  Private Function GetVersionFromFilePath(ByVal filePath As String) As Version
+
+    Dim major As Int32 = 0
+    Dim minor As Int32 = 0
+    Dim build As Int32 = 0
+    Dim revision As Int32 = 0
+
+    Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
+
+    Int32.TryParse(versionStringSplit(0), major)
+    If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)
+    If versionStringSplit.Length >= 3 Then Int32.TryParse(versionStringSplit(2), build)
+    If versionStringSplit.Length >= 4 Then Int32.TryParse(versionStringSplit(3), revision)
+
+    Return New Version(major, minor, build, revision)
+
+  End Function
 
 End Class
