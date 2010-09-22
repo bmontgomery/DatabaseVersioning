@@ -158,8 +158,19 @@ Public Class MsSqlDatabaseProvider
 
   Public Function RunScript(ByVal scriptText As String) As Object Implements IDatabaseProvider.RunScript
 
-    Dim scriptCommand As New SqlCommand(scriptText, connection, transaction)
-    scriptCommand.ExecuteNonQuery()
+    'If there are GO statements we need to split those statements up.
+    Dim commands As String() = Text.RegularExpressions.Regex.Split(scriptText, "^\s*go\s*$", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Multiline)
+
+    For Each commandText As String In commands
+
+      If Not String.IsNullOrEmpty(commandText) Then
+
+        Dim scriptCommand As New SqlCommand(commandText, connection, transaction)
+        scriptCommand.ExecuteNonQuery()
+
+      End If
+
+    Next
 
   End Function
 

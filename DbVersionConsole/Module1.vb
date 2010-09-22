@@ -29,8 +29,6 @@ Module Module1
       Console.WriteLine("Database upgraded succesfully.")
     End If
 
-    Console.ReadKey()
-
   End Sub
 
   Private Sub GenerateCommandLineArgDefinitions()
