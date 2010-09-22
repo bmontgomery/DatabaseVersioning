@@ -134,7 +134,7 @@ Public Class MsSqlDatabaseProvider
 
         If Not IsDBNull(oDR("VH_Major")) Then major = oDR("VH_Major")
         If Not IsDBNull(oDR("VH_Minor")) Then minor = oDR("VH_Minor")
-        If Not IsDBNull(oDR("VH_Build")) Then build = oDR("VH_Major")
+        If Not IsDBNull(oDR("VH_Build")) Then build = oDR("VH_Build")
         If Not IsDBNull(oDR("VH_Revision")) Then revision = oDR("VH_Revision")
 
       End If

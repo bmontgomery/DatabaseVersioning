@@ -169,6 +169,7 @@
 
     Catch ex As Exception
 
+      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Error: " + ex.Message, .DateLogged = Now})
       DatabaseProvider.RollBackTransaction()
       mErrorMessage = ex.Message
 
