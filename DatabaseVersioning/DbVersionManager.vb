@@ -60,6 +60,23 @@
     End Set
   End Property
 
+  Private mLogLevel As LoggingLevel = LoggingLevel.ErrorsOnly
+  Public Property LogLevel() As LoggingLevel
+    Get
+      Return mLogLevel
+    End Get
+    Set(ByVal value As LoggingLevel)
+      mLogLevel = value
+    End Set
+  End Property
+
+  Public Enum LoggingLevel
+    Verbose = 3
+    Medium = 2
+    ErrorsOnly = 1
+    Off = 0
+  End Enum
+
   Public Event MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
 
   Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal ParamArray otherDirs As String())
@@ -71,33 +88,37 @@
 
   End Sub
 
+  Private Sub LogMessage(ByVal message As String, ByVal logLevel As LoggingLevel)
+    If mLogLevel >= logLevel Then RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = message, .DateLogged = Now, .LogLevel = logLevel})
+  End Sub
+
   Public Sub Go()
 
-    RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Opening database connection", .DateLogged = Now})
+    LogMessage("Opening database connection", LoggingLevel.Verbose)
     DatabaseProvider.OpenDatabaseConnection(mConnectionString)
 
-    RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Beginning transaction", .DateLogged = Now})
+    LogMessage("Beginning transaction", LoggingLevel.Verbose)
     DatabaseProvider.BeginTransaction()
 
     Try
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Checking for existence of database", .DateLogged = Now})
+      LogMessage("Checking for existence of database", LoggingLevel.Verbose)
       If Not DatabaseProvider.DatabaseExists() Then
 
-        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Creating database", .DateLogged = Now})
+        LogMessage("Creating database", LoggingLevel.Medium)
         DatabaseProvider.CreateDatabase()
 
       End If
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Ensuring existence of version history table", .DateLogged = Now})
+      LogMessage("Ensuring existence of version history table", LoggingLevel.Verbose)
       DatabaseProvider.EnsureVersionHistoryTableExists()
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Getting current database version", .DateLogged = Now})
+      LogMessage("Getting current database version", LoggingLevel.Verbose)
       Dim currentDbVersion As Version = DatabaseProvider.GetDatabaseVersion()
 
       If mDrop Then
 
-        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Dropping items", .DateLogged = Now})
+        LogMessage("Dropping items", LoggingLevel.Medium)
         DatabaseProvider.DropItems()
 
       End If
@@ -109,7 +130,7 @@
 
       If ScriptsDirectory IsNot Nothing Then
 
-        RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Examining scripts directory for .sql files", .DateLogged = Now})
+        LogMessage("Examining scripts directory for .sql files", LoggingLevel.Verbose)
         For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
 
           If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
@@ -124,15 +145,21 @@
         'Run the scripts in order
         Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
 
+        LogMessage("Running scripts in """ + ScriptsDirectory + """", LoggingLevel.Medium)
 
         For Each scriptFile As VersionedScriptFile In orderedFilePaths
 
-          RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", .DateLogged = Now})
+          LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
 
-          DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+          Try
+            DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+          Catch ex As Exception
+            ThrowRunScriptException(ex, scriptFile.FilePath)
+          End Try
+
           DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
 
-          RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", .DateLogged = Now})
+          LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
 
           If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
 
@@ -145,13 +172,20 @@
 
         For Each otherDir As String In OtherDirectories
 
+          LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
           For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
 
             If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
 
-              RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Running other script """ + IO.Path.GetFileName(filePath) + """", .DateLogged = Now})
-              DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
-              RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Success", .DateLogged = Now})
+              LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
+
+              Try
+                DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+              Catch ex As Exception
+                ThrowRunScriptException(ex, filePath)
+              End Try
+
+              LogMessage("Success", LoggingLevel.Verbose)
 
             End If
 
@@ -161,23 +195,23 @@
 
       End If
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Committing transaction", .DateLogged = Now})
-
+      LogMessage("Committing transaction", LoggingLevel.Verbose)
       DatabaseProvider.CommitTransaction()
+      LogMessage("Transaction committed", LoggingLevel.Verbose)
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Transaction committed. Database upgraded to version " + latestVersion.ToString() + " successfully.", .DateLogged = Now})
+      LogMessage("Database upgraded to version " + latestVersion.ToString() + " successfully.", LoggingLevel.Medium)
 
     Catch ex As Exception
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Error: " + ex.Message, .DateLogged = Now})
+      LogMessage("Error: " + ex.Message, LoggingLevel.ErrorsOnly)
       DatabaseProvider.RollBackTransaction()
       mErrorMessage = ex.Message
 
     Finally
 
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Closing database connection", .DateLogged = Now})
+      LogMessage("Closing database connection", LoggingLevel.Verbose)
       DatabaseProvider.CloseDatabaseConnection()
-      RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = "Database connection closed", .DateLogged = Now})
+      LogMessage("Database connection closed", LoggingLevel.Verbose)
 
     End Try
 
@@ -200,5 +234,30 @@
     Return New Version(major, minor, build, revision)
 
   End Function
+
+  Private Shared Function GetSqlExceptionString(ByVal sqlEx As SqlClient.SqlException) As String
+
+    If sqlEx IsNot Nothing Then
+      Return String.Format("Msg {0}, Level {1}, State {2}, Line {3}" + Environment.NewLine + "{4}", _
+                           sqlEx.Number, _
+                           sqlEx.Class, _
+                           sqlEx.State, _
+                           sqlEx.LineNumber, _
+                           sqlEx.Message)
+    Else
+      Return String.Empty
+    End If
+
+  End Function
+
+  Private Shared Sub ThrowRunScriptException(ByVal ex As Exception, ByVal scriptFilePath As String)
+
+    If TypeOf ex Is SqlClient.SqlException Then
+      Throw New ApplicationException(String.Format("Error running script ""{0}"": " + Environment.NewLine + "{1}", scriptFilePath, GetSqlExceptionString(ex)))
+    Else
+      Throw New ApplicationException(String.Format("Error running script ""{0}"": {1}", scriptFilePath, ex.Message))
+    End If
+
+  End Sub
 
 End Class

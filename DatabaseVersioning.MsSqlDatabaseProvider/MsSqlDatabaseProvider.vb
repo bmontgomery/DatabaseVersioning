@@ -23,7 +23,7 @@ Public Class MsSqlDatabaseProvider
   End Function
 
   Public Function DatabaseExists() As Boolean Implements IDatabaseProvider.DatabaseExists
-
+    Return True
   End Function
 
   Public Function DropItems() As Object Implements IDatabaseProvider.DropItems

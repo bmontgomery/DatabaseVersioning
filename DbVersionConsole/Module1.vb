@@ -8,6 +8,7 @@ Module Module1
   Private Const CONN_STR_ARG As String = "connStr"
   Private Const DROP_ARG As String = "drop"
   Private Const SCRIPTS_DIR_ARG As String = "scriptsDir"
+  Private Const LOG_LEVEL_ARG As String = "l"
   Private Const OTHER_KEY As String = "other"
 
   Private validArgs As New HashSet(Of String)()
@@ -16,25 +17,30 @@ Module Module1
 
   Sub Main()
 
+    WriteInfo()
+
     GenerateCommandLineArgDefinitions()
     ParseCommandLineArgs()
 
     InitDbVersionManager()
 
-    AddHandler dbVerMgr.MessageLogged, AddressOf MessageLogged
-
     dbVerMgr.Go()
 
-    If Not String.IsNullOrEmpty(dbVerMgr.ErrorMessage) Then
-      Console.WriteLine(dbVerMgr.ErrorMessage)
-    Else
-      Console.WriteLine("Database upgraded succesfully.")
-    End If
+  End Sub
+
+  Private Sub WriteInfo()
+
+    Console.WriteLine("")
+    Console.WriteLine("DbVersionManager")
+    Console.WriteLine("")
 
   End Sub
 
   Private Sub MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
+
+    If e.LogLevel = DbVersionManager.LoggingLevel.ErrorsOnly Then Console.WriteLine("")
     Console.WriteLine(e.Message)
+
   End Sub
 
   Private Sub GenerateCommandLineArgDefinitions()
@@ -42,6 +48,7 @@ Module Module1
     validArgs.Add(CONN_STR_ARG)
     validArgs.Add(DROP_ARG)
     validArgs.Add(SCRIPTS_DIR_ARG)
+    validArgs.Add(LOG_LEVEL_ARG)
 
   End Sub
 
@@ -105,6 +112,29 @@ Module Module1
 
     dbVerMgr = New DbVersionManager(connStr, drop, scriptsDir, otherDirs)
     dbVerMgr.DatabaseProvider = New MsSqlDatabaseProvider()
+    dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.Medium
+
+    If args.ContainsKey(LOG_LEVEL_ARG) Then
+
+      Select Case args(LOG_LEVEL_ARG)
+
+        Case "v"
+          dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.Verbose
+
+        Case "e"
+          dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.ErrorsOnly
+
+        Case "o"
+          dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.Off
+
+        Case "m"
+          dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.Medium
+
+      End Select
+
+    End If
+
+    AddHandler dbVerMgr.MessageLogged, AddressOf MessageLogged
 
   End Sub
 

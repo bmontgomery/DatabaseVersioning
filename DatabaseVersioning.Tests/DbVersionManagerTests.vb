@@ -398,9 +398,8 @@ Public Class DbVersionManagerTests
   Public Sub MgrGo_Errors_ReturnsErrorMessage()
 
     'Arrange
-    Dim testErrorMessage As String = "Test error message"
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Throw(New ApplicationException(testErrorMessage))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Throw(New ApplicationException(""))
 
     mockery.ReplayAll()
 
@@ -408,7 +407,7 @@ Public Class DbVersionManagerTests
     dbVerMgr.Go()
 
     'Assert
-    Assert.AreEqual(testErrorMessage, dbVerMgr.ErrorMessage)
+    Assert.IsFalse(String.IsNullOrEmpty(dbVerMgr.ErrorMessage))
 
   End Sub
 

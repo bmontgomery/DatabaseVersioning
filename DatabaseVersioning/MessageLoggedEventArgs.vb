@@ -20,4 +20,14 @@
     End Set
   End Property
 
+  Private mLogLevel As DbVersionManager.LoggingLevel
+  Public Property LogLevel() As DbVersionManager.LoggingLevel
+    Get
+      Return mLogLevel
+    End Get
+    Set(ByVal value As DbVersionManager.LoggingLevel)
+      mLogLevel = value
+    End Set
+  End Property
+
 End Class
