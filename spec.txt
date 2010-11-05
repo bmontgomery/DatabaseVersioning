@@ -1,0 +1,60 @@
+REQUIREMENTS
+=====
+
+CONSTRUCTOR
+-----
+Take the following arguments on the constructor
+ - connStr: database connection string
+ - noDrop: this tells the program not to drop objects (SP's, views, functions) before running scripts
+ - scripts: the path to the directory containing the scripts to run
+ - other: other directories containing scripts to run
+
+ATOMIC
+-----
+if one part of the program fails, the database needs to go back to the way it was before the program was started
+
+CREATES DATABASE
+-----
+only if necessary
+
+DROPS STORED PROCEDURES, FUNCTIONS, VIEWS
+-----
+before running anything
+
+CREATES VERSIONHISTORY TABLE
+-----
+only if necessary
+VersionHistory
+ - ID int not null primary key identity(1,1)
+ - FileName varchar(max)
+ - DateApplied datetime
+ - Major int
+ - Minor int
+ - Build int
+ - Revision int
+
+RUNS SCRIPTS, THEN OTHERDIRS IN ORDER
+-----
+the scripts will be run first from earliest version to latest version. Then, the otherDirs parameter values will be iterated, running everything in each of those folders in the order they were passed in to the program
+
+ONLY RUNS SCRIPTS TO UPGRADE TO LATEST VERSION
+-----
+this is based on the latest version that has been applied in the database.
+
+UPDATES VERSIONHISTORY TABLE FOR EACH SCRIPT RUN
+-----
+a record will be inserted into the VersionHistory table for each script run.
+
+UPON ERROR, ROLLBACK, REPORT ERROR TO USER
+-----
+if there is a SQL error or any other type of exception in the program, the program will rollback the transaction, and report the error to the user. Relevant information will also be given to the user, such as the path to the file which caused the error, and the error message itself.
+
+ASSUMPTIONS
+=====
+Scripts will be named with version, i.e. 1.0.0.1.sql or 1.2.0.1.sql
+Scripts will not manipulate the VersionHistory table - the program will take care of this
+
+NOTES
+-----
+not dependent on a specific database - decoupled from actual DB code, however an implementation of the interface used will be written to interface with MS SQL.
+class library, but a front end command line program will be written to call the class library and display output.

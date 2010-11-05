@@ -1,4 +1,5 @@
 ﻿Public Interface IDatabaseProvider
+  Inherits IDisposable
 
   ''' <summary>
   ''' Opens a new database connection to use for the upgrade cycle.

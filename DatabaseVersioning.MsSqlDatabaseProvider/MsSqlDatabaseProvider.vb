@@ -195,7 +195,29 @@ Public Class MsSqlDatabaseProvider
 
     Dim updateVersionCommand As New SqlCommand(sql.ToString(), connection, transaction)
     updateVersionCommand.ExecuteNonQuery()
-    
+
   End Function
+
+  Private disposedValue As Boolean = False    ' To detect redundant calls
+
+  ' IDisposable
+  Protected Overridable Sub Dispose(ByVal disposing As Boolean)
+    If Not Me.disposedValue Then
+      If disposing Then
+        If transaction IsNot Nothing Then transaction.Dispose()
+        If connection IsNot Nothing Then connection.Dispose()
+      End If
+    End If
+    Me.disposedValue = True
+  End Sub
+
+#Region " IDisposable Support "
+  ' This code added by Visual Basic to correctly implement the disposable pattern.
+  Public Sub Dispose() Implements IDisposable.Dispose
+    ' Do not change this code.  Put cleanup code in Dispose(ByVal disposing As Boolean) above.
+    Dispose(True)
+    GC.SuppressFinalize(Me)
+  End Sub
+#End Region
 
 End Class
