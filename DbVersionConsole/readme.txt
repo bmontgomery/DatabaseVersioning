@@ -8,8 +8,11 @@ necessary scripts from the scripts directory. This tool will create a
 VersionHistory table in the database to keep track of what the current version
 of the database is. It uses this table to determine which scripts from the
 scripts directory need to be run. Scripts in the scripts directory should be
-named using this scheme: "<version> - <description>.sql". For example, a script
-might be named "2.2.3.1 - add a column to the users table.sql".
+named using this scheme: "<version> <description>.sql". For example, a script
+might be named "2.2.3.1 - add a column to the users table.sql". This tool will
+find the version number by reading until it encounters the first space in the
+file name, so you must have a space in the name between the version number and
+the description.
 
 When this tool is run, it is treated as one transaction. If any of the scripts
 this tool runs fails, the entire upgrade will be rolled back.
