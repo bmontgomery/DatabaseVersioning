@@ -1,5 +1,5 @@
 ﻿Synopsis
-cinch -connStr <connectionstring> [-help] [-drop] [-scriptsDir <path>] 
+cinch -connStr <connectionstring> [-help] [-drop] [-scripts <path>] 
       [-other <path> [<path> <path> ...]] [-l <loglevel>]
 
 Description
@@ -22,7 +22,7 @@ Options
 -drop                               Drop all stored procedures, functions, and
                                     views before running the scripts.
                                     
--scriptsDir <path>                  Defines the directory containing the
+-scripts <path>                     Defines the directory containing the
                                     versioned script files.
                                     
 -l <loglevel>                       Defines the log verbosity level (what

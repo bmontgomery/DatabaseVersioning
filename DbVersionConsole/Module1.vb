@@ -7,7 +7,7 @@ Module Module1
 
   Private Const CONN_STR_ARG As String = "connStr"
   Private Const DROP_ARG As String = "drop"
-  Private Const SCRIPTS_DIR_ARG As String = "scriptsDir"
+  Private Const SCRIPTS_DIR_ARG As String = "scripts"
   Private Const LOG_LEVEL_ARG As String = "l"
   Private Const OTHER_KEY As String = "other"
   Private Const HELP_ARG As String = "help"
@@ -37,8 +37,9 @@ Module Module1
   Private Sub WriteInfo()
 
     Console.WriteLine("")
-    Console.WriteLine("Cinch")
+    Console.WriteLine("CINCH")
     Console.WriteLine("by Brandon Montgomery")
+    Console.WriteLine("2010")
     Console.WriteLine("")
 
   End Sub
@@ -55,6 +56,7 @@ Module Module1
     validArgs.Add(CONN_STR_ARG)
     validArgs.Add(DROP_ARG)
     validArgs.Add(SCRIPTS_DIR_ARG)
+    validArgs.Add(OTHER_KEY)
     validArgs.Add(LOG_LEVEL_ARG)
     validArgs.Add(HELP_ARG)
 
@@ -62,47 +64,34 @@ Module Module1
 
   Private Sub ParseCommandLineArgs()
 
-    Dim argsStrings As String() = Environment.GetCommandLineArgs()
-    Dim arg As String = Nothing
+    Dim argStrings As String() = Environment.GetCommandLineArgs()
+    Dim currentArg As String = Nothing
 
-    For i As Int32 = 1 To argsStrings.Length - 1
+    For i As Int32 = 1 To argStrings.Length - 1
 
-      If arg Is Nothing Then
+      If validArgs.Contains(argStrings(i).TrimStart(ARG_BEGIN_STR)) Then
 
-        If validArgs.Contains(argsStrings(i).TrimStart(ARG_BEGIN_STR)) Then
-          arg = argsStrings(i).TrimStart(ARG_BEGIN_STR)
-        Else
-
-          If Not args.ContainsKey(OTHER_KEY) Then
-            args.Add(OTHER_KEY, argsStrings(i))
-          Else
-            args(OTHER_KEY) += ARG_VALUE_SEPARATOR + argsStrings(i)
-          End If
-
-        End If
+        currentArg = argStrings(i).TrimStart(ARG_BEGIN_STR)
+        args.Add(currentArg, Nothing)
 
       Else
 
-        If Not args.ContainsKey(arg) Then
-          args.Add(arg, argsStrings(i))
+        If String.IsNullOrEmpty(args(currentArg)) Then
+          args(currentArg) = argStrings(i)
+        Else
+          args(currentArg) += ARG_VALUE_SEPARATOR + argStrings(i)
         End If
-
-        arg = Nothing
 
       End If
 
     Next
-
-    If Not args.ContainsKey(arg) Then
-      args.Add(arg, String.Empty)
-    End If
 
   End Sub
 
   Private Sub InitDbVersionManager()
 
     Dim connStr As String = String.Empty
-    Dim drop As Boolean = True
+    Dim drop As Boolean = False
     Dim scriptsDir As String = String.Empty
     Dim otherDirs As String() = Nothing
 
@@ -110,9 +99,7 @@ Module Module1
       connStr = args(CONN_STR_ARG)
     End If
 
-    If args.ContainsKey(DROP_ARG) AndAlso args(DROP_ARG).Equals("false", StringComparison.OrdinalIgnoreCase) Then
-      drop = False
-    End If
+    drop = args.ContainsKey(DROP_ARG)
 
     If args.ContainsKey(SCRIPTS_DIR_ARG) Then
       scriptsDir = args(SCRIPTS_DIR_ARG)

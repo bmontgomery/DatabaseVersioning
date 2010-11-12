@@ -228,7 +228,20 @@
     Dim build As Int32 = 0
     Dim revision As Int32 = 0
 
-    Dim versionStringSplit As String() = IO.Path.GetFileNameWithoutExtension(filePath).Split(".")
+    Dim fileNameWithoutExt As String = IO.Path.GetFileNameWithoutExtension(filePath)
+    Dim versionString As String
+
+    Dim spaceIndex As Int32 = fileNameWithoutExt.IndexOf(" ")
+    If spaceIndex > 0 Then
+
+      'strip off the end of the string which isn't part of the version
+      versionString = fileNameWithoutExt.Substring(0, spaceIndex)
+
+    Else
+      versionString = fileNameWithoutExt
+    End If
+
+    Dim versionStringSplit As String() = versionString.Split(".")
 
     Int32.TryParse(versionStringSplit(0), major)
     If versionStringSplit.Length >= 2 Then Int32.TryParse(versionStringSplit(1), minor)

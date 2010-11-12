@@ -71,7 +71,7 @@ Public Class MsSqlDatabaseProvider
     sql.AppendLine("Fetch Next From @views Into @viewName")
 
     sql.AppendLine("While @@FETCH_STATUS = 0 Begin")
-    sql.AppendLine("	If @viewName <> '' Exec('DROP PROCEDURE [' + @viewName + ']')")
+    sql.AppendLine("	If @viewName <> '' Exec('DROP VIEW [' + @viewName + ']')")
     sql.AppendLine("	Fetch Next From @views Into @viewName")
     sql.AppendLine("End")
 
