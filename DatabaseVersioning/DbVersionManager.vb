@@ -128,7 +128,7 @@
       'Scripts first
       Dim versionedFiles As New List(Of VersionedScriptFile)
 
-      If ScriptsDirectory IsNot Nothing Then
+      If Not String.IsNullOrEmpty(ScriptsDirectory) Then
 
         LogMessage("Examining scripts directory for .sql files", LoggingLevel.Verbose)
         For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
@@ -172,24 +172,28 @@
 
         For Each otherDir As String In OtherDirectories
 
-          LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
-          For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
+          If Not String.IsNullOrEmpty(otherDir) Then
 
-            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+            LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
+            For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
 
-              LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
+              If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
 
-              Try
-                DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
-              Catch ex As Exception
-                ThrowRunScriptException(ex, filePath)
-              End Try
+                LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
 
-              LogMessage("Success", LoggingLevel.Verbose)
+                Try
+                  DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+                Catch ex As Exception
+                  ThrowRunScriptException(ex, filePath)
+                End Try
 
-            End If
+                LogMessage("Success", LoggingLevel.Verbose)
 
-          Next
+              End If
+
+            Next
+
+          End If
 
         Next
 

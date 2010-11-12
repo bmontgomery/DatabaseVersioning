@@ -38,7 +38,7 @@ Module Module1
 
     Console.WriteLine("")
     Console.WriteLine("Cinch")
-    Console.WriteLine("by TeamDynamix")
+    Console.WriteLine("by Brandon Montgomery")
     Console.WriteLine("")
 
   End Sub
