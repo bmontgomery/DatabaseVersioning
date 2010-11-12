@@ -1,5 +1,0 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-connStr "Server=.\SQLEXPRESS;Database=TDCommunityDev;Trusted_Connection=True;" -scriptsDir "C:\PreCompiledWeb\TDCommunity Release Files\Scripts" "C:\PreCompiledWeb\TDCommunity Release Files\Views" "C:\PreCompiledWeb\TDCommunity Release Files\StoredProcs" -drop false</StartArguments>
-  </PropertyGroup>
-</Project>

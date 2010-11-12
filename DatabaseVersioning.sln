@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
-Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "DbVersionConsole", "DbVersionConsole\DbVersionConsole.vbproj", "{C5C097A4-034C-451A-93AC-09562769E073}"
+Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "Cinch", "DbVersionConsole\Cinch.vbproj", "{C5C097A4-034C-451A-93AC-09562769E073}"
 EndProject
 Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "DatabaseVersioning", "DatabaseVersioning\DatabaseVersioning.vbproj", "{8EB5E493-1B5B-4721-A3D5-123D4339B660}"
 EndProject

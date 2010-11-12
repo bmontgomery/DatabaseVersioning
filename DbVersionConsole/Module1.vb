@@ -2,14 +2,15 @@
 
 Module Module1
 
-  Private Const argBeginStr As String = "-"
-  Private Const argValSeperator As String = ","
+  Private Const ARG_BEGIN_STR As String = "-"
+  Private Const ARG_VALUE_SEPARATOR As String = ","
 
   Private Const CONN_STR_ARG As String = "connStr"
   Private Const DROP_ARG As String = "drop"
   Private Const SCRIPTS_DIR_ARG As String = "scriptsDir"
   Private Const LOG_LEVEL_ARG As String = "l"
   Private Const OTHER_KEY As String = "other"
+  Private Const HELP_ARG As String = "help"
 
   Private validArgs As New HashSet(Of String)()
   Private args As New Dictionary(Of String, String)
@@ -22,16 +23,22 @@ Module Module1
     GenerateCommandLineArgDefinitions()
     ParseCommandLineArgs()
 
-    InitDbVersionManager()
+    If args.ContainsKey(HELP_ARG) Then
+      PrintHelp()
+    Else
 
-    dbVerMgr.Go()
+      InitDbVersionManager()
+      dbVerMgr.Go()
+
+    End If
 
   End Sub
 
   Private Sub WriteInfo()
 
     Console.WriteLine("")
-    Console.WriteLine("DbVersionManager")
+    Console.WriteLine("Cinch")
+    Console.WriteLine("by TeamDynamix")
     Console.WriteLine("")
 
   End Sub
@@ -49,6 +56,7 @@ Module Module1
     validArgs.Add(DROP_ARG)
     validArgs.Add(SCRIPTS_DIR_ARG)
     validArgs.Add(LOG_LEVEL_ARG)
+    validArgs.Add(HELP_ARG)
 
   End Sub
 
@@ -61,14 +69,14 @@ Module Module1
 
       If arg Is Nothing Then
 
-        If validArgs.Contains(argsStrings(i).TrimStart(argBeginStr)) Then
-          arg = argsStrings(i).TrimStart(argBeginStr)
+        If validArgs.Contains(argsStrings(i).TrimStart(ARG_BEGIN_STR)) Then
+          arg = argsStrings(i).TrimStart(ARG_BEGIN_STR)
         Else
 
           If Not args.ContainsKey(OTHER_KEY) Then
             args.Add(OTHER_KEY, argsStrings(i))
           Else
-            args(OTHER_KEY) += argValSeperator + argsStrings(i)
+            args(OTHER_KEY) += ARG_VALUE_SEPARATOR + argsStrings(i)
           End If
 
         End If
@@ -84,6 +92,10 @@ Module Module1
       End If
 
     Next
+
+    If Not args.ContainsKey(arg) Then
+      args.Add(arg, String.Empty)
+    End If
 
   End Sub
 
@@ -135,6 +147,17 @@ Module Module1
     End If
 
     AddHandler dbVerMgr.MessageLogged, AddressOf MessageLogged
+
+  End Sub
+
+  Private Sub PrintHelp()
+
+    Dim helpFilePath As String = IO.Path.Combine(Environment.CurrentDirectory, "readme.txt")
+    If IO.File.Exists(helpFilePath) Then
+      Console.Write(IO.File.ReadAllText(helpFilePath))
+    Else
+      Console.WriteLine("The readme.txt file is missing at " + helpFilePath + "!")
+    End If
 
   End Sub
 
