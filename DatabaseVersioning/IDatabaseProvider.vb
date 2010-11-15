@@ -35,18 +35,18 @@
   ''' <returns></returns>
   Function CommitTransaction()
 
-  ''' <summary>
-  ''' Checks for the existance of the database. Returns true if the database exists;
-  ''' otherwise false.
-  ''' </summary>
-  ''' <returns></returns>
-  Function DatabaseExists() As Boolean
+  '''' <summary>
+  '''' Checks for the existance of the database. Returns true if the database exists;
+  '''' otherwise false.
+  '''' </summary>
+  '''' <returns></returns>
+  'Function DatabaseExists() As Boolean
 
-  ''' <summary>
-  ''' Creates the database.
-  ''' </summary>
-  ''' <returns></returns>
-  Function CreateDatabase()
+  '''' <summary>
+  '''' Creates the database.
+  '''' </summary>
+  '''' <returns></returns>
+  'Function CreateDatabase()
 
   ''' <summary>
   ''' Ensures the version history table exists. If the version history table does not

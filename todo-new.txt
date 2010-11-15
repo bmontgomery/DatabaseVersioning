@@ -1,3 +1,4 @@
 i want to run a specific versioned script, as long as it hasn't been run
 i want to run the db upgrade scripts, including scripts which are < current version, if i tell the program to do so
 i want to view a help text when i tell the program to tell me how to use it!
+i want to see what the default value for log level is in the help

@@ -102,13 +102,13 @@
 
     Try
 
-      LogMessage("Checking for existence of database", LoggingLevel.Verbose)
-      If Not DatabaseProvider.DatabaseExists() Then
+      'LogMessage("Checking for existence of database", LoggingLevel.Verbose)
+      'If Not DatabaseProvider.DatabaseExists() Then
 
-        LogMessage("Creating database", LoggingLevel.Medium)
-        DatabaseProvider.CreateDatabase()
+      '  LogMessage("Creating database", LoggingLevel.Medium)
+      '  DatabaseProvider.CreateDatabase()
 
-      End If
+      'End If
 
       LogMessage("Ensuring existence of version history table", LoggingLevel.Verbose)
       DatabaseProvider.EnsureVersionHistoryTableExists()

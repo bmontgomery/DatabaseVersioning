@@ -18,13 +18,13 @@ Public Class MsSqlDatabaseProvider
     transaction.Commit()
   End Function
 
-  Public Function CreateDatabase() As Object Implements IDatabaseProvider.CreateDatabase
+  'Public Function CreateDatabase() As Object Implements IDatabaseProvider.CreateDatabase
 
-  End Function
+  'End Function
 
-  Public Function DatabaseExists() As Boolean Implements IDatabaseProvider.DatabaseExists
-    Return True
-  End Function
+  'Public Function DatabaseExists() As Boolean Implements IDatabaseProvider.DatabaseExists
+  '  Return True
+  'End Function
 
   Public Function DropItems() As Object Implements IDatabaseProvider.DropItems
 
@@ -49,13 +49,13 @@ Public Class MsSqlDatabaseProvider
     '--functions
     sql.AppendLine("Declare @functionName varchar(500)")
     sql.AppendLine("Declare @functions cursor	")
-    sql.AppendLine("Set @functions = Cursor For Select name From sysobjects Where type = 'P' and category = '0'")
+    sql.AppendLine("Set @functions = Cursor For Select name From sysobjects Where type = 'FN' and category = '0'")
 
     sql.AppendLine("Open @functions")
     sql.AppendLine("Fetch Next From @functions Into @functionName")
 
     sql.AppendLine("While @@FETCH_STATUS = 0 Begin")
-    sql.AppendLine("	If @functionName <> '' Exec('DROP PROCEDURE [' + @functionName + ']')")
+    sql.AppendLine("	If @functionName <> '' Exec('DROP FUNCTION [' + @functionName + ']')")
     sql.AppendLine("	Fetch Next From @functions Into @functionName")
     sql.AppendLine("End")
 

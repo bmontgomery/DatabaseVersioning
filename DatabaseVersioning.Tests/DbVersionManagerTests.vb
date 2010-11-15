@@ -125,55 +125,55 @@ Public Class DbVersionManagerTests
 
   End Sub
 
-  <Test()> _
-  Public Sub Mgr_Go_ChecksForDatabaseExistence()
+  '<Test()> _
+  'Public Sub Mgr_Go_ChecksForDatabaseExistence()
 
-    'Arrange
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+  '  'Arrange
+  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
 
-    mockery.ReplayAll()
+  '  mockery.ReplayAll()
 
-    'Action
-    dbVerMgr.Go()
+  '  'Action
+  '  dbVerMgr.Go()
 
-    'Assert
-    mockery.VerifyAll()
+  '  'Assert
+  '  mockery.VerifyAll()
 
-  End Sub
+  'End Sub
 
-  <Test()> _
-  Public Sub MgrGo_NoDatabase_CreatesDatabase()
+  '<Test()> _
+  'Public Sub MgrGo_NoDatabase_CreatesDatabase()
 
-    'Arrange
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(False)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Return(True)
+  '  'Arrange
+  '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(False)
+  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Return(True)
 
-    mockery.ReplayAll()
+  '  mockery.ReplayAll()
 
-    'Action
-    dbVerMgr.Go()
+  '  'Action
+  '  dbVerMgr.Go()
 
-    'Assert
-    mockery.VerifyAll()
+  '  'Assert
+  '  mockery.VerifyAll()
 
-  End Sub
+  'End Sub
 
-  <Test()> _
-  Public Sub MgrGo_DatabaseExists_DoesNotCreateDatabase()
+  '<Test()> _
+  'Public Sub MgrGo_DatabaseExists_DoesNotCreateDatabase()
 
-    'Arrange
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Repeat.Never()
+  '  'Arrange
+  '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Repeat.Never()
 
-    mockery.ReplayAll()
+  '  mockery.ReplayAll()
 
-    'Action
-    dbVerMgr.Go()
+  '  'Action
+  '  dbVerMgr.Go()
 
-    'Assert
-    mockery.VerifyAll()
+  '  'Assert
+  '  mockery.VerifyAll()
 
-  End Sub
+  'End Sub
 
   <Test()> _
   Public Sub MgrGo_DropAllTrue_DropsAllItems()
@@ -372,7 +372,7 @@ Public Class DbVersionManagerTests
     dbVerMgr.DatabaseProvider = strictDbProvider
 
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.OpenDatabaseConnection(CONN_STR)).Return(True)
-    strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
+    'strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.BeginTransaction()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DropItems()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(1, 0, 0, 3))
