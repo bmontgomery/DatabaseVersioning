@@ -14,6 +14,9 @@ find the version number by reading until it encounters the first space in the
 file name, so you must have a space in the name between the version number and
 the description.
 
+Each script file (specified by the -scripts or by the -other parameter) must
+have the .sql extension in order for this tool to run it.
+
 When this tool is run, it is treated as one transaction. If any of the scripts
 this tool runs fails, the entire upgrade will be rolled back.
 
@@ -35,8 +38,9 @@ Options
                                       m: Medium
                                       e: Errors Only
                                       o: Off
+                                    Defaults to "e" (Errors Only)
                                     
--other <path> [<path> <path> ...]   Defines one to many script directories
+-other <path> [<path> <path> ...]   Defines one or more script directories
                                     which contain unversioned scripts to run
                                     during the upgrade.
                                     

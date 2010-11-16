@@ -26,7 +26,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_OpensDatabaseConnection()
+  Public Sub Mgr_Upgrade_OpensDatabaseConnection()
 
     'Arrange
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.OpenDatabaseConnection(CONN_STR)).Return(True)
@@ -34,7 +34,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -42,7 +42,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_Success_ClosesDatabaseConnection()
+  Public Sub MgrUpgrade_Success_ClosesDatabaseConnection()
 
     'Arrange
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
@@ -50,7 +50,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -58,7 +58,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_Errors_ClosesDatabaseConnection()
+  Public Sub MgrUpgrade_Errors_ClosesDatabaseConnection()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists()).Throw(New ApplicationException(""))
@@ -67,7 +67,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -75,7 +75,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_BeginsTransaction()
+  Public Sub Mgr_Upgrade_BeginsTransaction()
 
     'Arrange
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.BeginTransaction()).Return(True)
@@ -83,7 +83,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -91,7 +91,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_Errors_RollsBackTransaction()
+  Public Sub MgrUpgrade_Errors_RollsBackTransaction()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists()).Throw(New ApplicationException(""))
@@ -100,7 +100,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -108,7 +108,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_Succeeds_CommitsTransaction()
+  Public Sub MgrUpgrade_Succeeds_CommitsTransaction()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -118,7 +118,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -126,7 +126,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   '<Test()> _
-  'Public Sub Mgr_Go_ChecksForDatabaseExistence()
+  'Public Sub Mgr_Upgrade_ChecksForDatabaseExistence()
 
   '  'Arrange
   '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
@@ -142,7 +142,7 @@ Public Class DbVersionManagerTests
   'End Sub
 
   '<Test()> _
-  'Public Sub MgrGo_NoDatabase_CreatesDatabase()
+  'Public Sub MgrUpgrade_NoDatabase_CreatesDatabase()
 
   '  'Arrange
   '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(False)
@@ -159,7 +159,7 @@ Public Class DbVersionManagerTests
   'End Sub
 
   '<Test()> _
-  'Public Sub MgrGo_DatabaseExists_DoesNotCreateDatabase()
+  'Public Sub MgrUpgrade_DatabaseExists_DoesNotCreateDatabase()
 
   '  'Arrange
   '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
@@ -176,7 +176,7 @@ Public Class DbVersionManagerTests
   'End Sub
 
   <Test()> _
-  Public Sub MgrGo_DropAllTrue_DropsAllItems()
+  Public Sub MgrUpgrade_DropAllTrue_DropsAllItems()
 
     'Arrange
     dbVerMgr.Drop = True
@@ -185,7 +185,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -193,7 +193,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_DropAllFalse_DoesNotDropItems()
+  Public Sub MgrUpgrade_DropAllFalse_DoesNotDropItems()
 
     'Arrange
     dbVerMgr.Drop = False
@@ -202,7 +202,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -210,7 +210,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_EnsuresVersionHistoryTableExists()
+  Public Sub Mgr_Upgrade_EnsuresVersionHistoryTableExists()
 
     'Arrange
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.EnsureVersionHistoryTableExists())
@@ -218,7 +218,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -226,7 +226,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_RunsScripts()
+  Public Sub Mgr_Upgrade_RunsScripts()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -236,7 +236,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -244,7 +244,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_RunsOnlySqlScripts()
+  Public Sub Mgr_Upgrade_RunsOnlySqlScripts()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -254,7 +254,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -262,7 +262,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_RunsScriptsInOrderOfVersion()
+  Public Sub Mgr_Upgrade_RunsScriptsInOrderOfVersion()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -280,7 +280,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -288,7 +288,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_RunsOtherScriptsAfterScripts()
+  Public Sub Mgr_Upgrade_RunsOtherScriptsAfterScripts()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -302,7 +302,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -310,7 +310,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Mgr_Go_RunsOtherDirScriptsInOrder()
+  Public Sub Mgr_Upgrade_RunsOtherDirScriptsInOrder()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -340,7 +340,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -348,7 +348,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_FreshDatabase_RunsAllScripts()
+  Public Sub MgrUpgrade_FreshDatabase_RunsAllScripts()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -357,7 +357,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -365,7 +365,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_PartiallyUpdatedDatabase_RunsOnlyNecessaryScripts()
+  Public Sub MgrUpgrade_PartiallyUpdatedDatabase_RunsOnlyNecessaryScripts()
 
     'Arrange
     Dim strictDbProvider As IDatabaseProvider = mockery.StrictMock(Of IDatabaseProvider)()
@@ -387,7 +387,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     mockery.VerifyAll()
@@ -395,7 +395,7 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub MgrGo_Errors_ReturnsErrorMessage()
+  Public Sub MgrUpgrade_Errors_ReturnsErrorMessage()
 
     'Arrange
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
@@ -404,7 +404,7 @@ Public Class DbVersionManagerTests
     mockery.ReplayAll()
 
     'Action
-    dbVerMgr.Go()
+    dbVerMgr.Upgrade()
 
     'Assert
     Assert.IsFalse(String.IsNullOrEmpty(dbVerMgr.ErrorMessage))

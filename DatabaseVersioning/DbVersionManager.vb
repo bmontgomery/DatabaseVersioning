@@ -1,5 +1,7 @@
 ﻿Public Class DbVersionManager
 
+#Region "Properties"
+
   Private mConnectionString As String
   Public Property ConnectionString() As String
     Get
@@ -70,11 +72,13 @@
     End Set
   End Property
 
+#End Region
+
   Public Enum LoggingLevel
-    Verbose = 3
-    Medium = 2
-    ErrorsOnly = 1
-    Off = 0
+    Verbose
+    Medium
+    ErrorsOnly
+    Off
   End Enum
 
   Public Event MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
@@ -88,11 +92,7 @@
 
   End Sub
 
-  Private Sub LogMessage(ByVal message As String, ByVal logLevel As LoggingLevel)
-    If mLogLevel >= logLevel Then RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = message, .DateLogged = Now, .LogLevel = logLevel})
-  End Sub
-
-  Public Sub Go()
+  Public Sub Upgrade()
 
     LogMessage("Opening database connection", LoggingLevel.Verbose)
     DatabaseProvider.OpenDatabaseConnection(mConnectionString)
@@ -101,14 +101,6 @@
     DatabaseProvider.BeginTransaction()
 
     Try
-
-      'LogMessage("Checking for existence of database", LoggingLevel.Verbose)
-      'If Not DatabaseProvider.DatabaseExists() Then
-
-      '  LogMessage("Creating database", LoggingLevel.Medium)
-      '  DatabaseProvider.CreateDatabase()
-
-      'End If
 
       LogMessage("Ensuring existence of version history table", LoggingLevel.Verbose)
       DatabaseProvider.EnsureVersionHistoryTableExists()
@@ -123,81 +115,11 @@
 
       End If
 
-      Dim latestVersion As Version = currentDbVersion
-
       'Scripts first
-      Dim versionedFiles As New List(Of VersionedScriptFile)
-
-      If Not String.IsNullOrEmpty(ScriptsDirectory) Then
-
-        LogMessage("Examining scripts directory for .sql files", LoggingLevel.Verbose)
-        For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
-
-          If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
-
-            Dim fileVersion As Version = GetVersionFromFilePath(filePath)
-            If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
-
-          End If
-
-        Next
-
-        'Run the scripts in order
-        Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
-
-        LogMessage("Running scripts in """ + ScriptsDirectory + """", LoggingLevel.Medium)
-
-        For Each scriptFile As VersionedScriptFile In orderedFilePaths
-
-          LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
-
-          Try
-            DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
-          Catch ex As Exception
-            ThrowRunScriptException(ex, scriptFile.FilePath)
-          End Try
-
-          DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
-
-          LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
-
-          If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
-
-        Next
-
-      End If
+      Dim latestVersion As Version = RunVersionedScripts(currentDbVersion)
 
       'Other script directories
-      If OtherDirectories IsNot Nothing Then
-
-        For Each otherDir As String In OtherDirectories
-
-          If Not String.IsNullOrEmpty(otherDir) Then
-
-            LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
-            For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
-
-              If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
-
-                LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
-
-                Try
-                  DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
-                Catch ex As Exception
-                  ThrowRunScriptException(ex, filePath)
-                End Try
-
-                LogMessage("Success", LoggingLevel.Verbose)
-
-              End If
-
-            Next
-
-          End If
-
-        Next
-
-      End If
+      RunOtherScripts()
 
       LogMessage("Committing transaction", LoggingLevel.Verbose)
       DatabaseProvider.CommitTransaction()
@@ -221,6 +143,111 @@
 
   End Sub
 
+  ''' <summary>
+  ''' Logs the message if the log level set by the user is set to lower than the specified log level.
+  ''' </summary>
+  ''' <param name="message">The message.</param>
+  ''' <param name="logLevel">The log level of the message.</param>
+  Private Sub LogMessage(ByVal message As String, ByVal logLevel As LoggingLevel)
+    If mLogLevel >= logLevel Then RaiseEvent MessageLogged(Me, New MessageLoggedEventArgs() With {.Message = message, .DateLogged = Now, .LogLevel = logLevel})
+  End Sub
+
+  ''' <summary>
+  ''' Runs the versioned scripts. Returns the version to which this method upgrades the database.
+  ''' </summary>
+  ''' <param name="currentDbVersion">The current version of the database.</param>
+  ''' <returns></returns>
+  Private Function RunVersionedScripts(ByVal currentDbVersion As Version) As Version
+
+    Dim latestVersion As Version = currentDbVersion
+    Dim versionedFiles As New List(Of VersionedScriptFile)
+
+    If Not String.IsNullOrEmpty(ScriptsDirectory) Then
+
+      LogMessage("Examining scripts directory for .sql files", LoggingLevel.Verbose)
+      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+
+        If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+
+          Dim fileVersion As Version = GetVersionFromFilePath(filePath)
+          If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+
+        End If
+
+      Next
+
+      'Run the scripts in order
+      Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
+
+      LogMessage("Running scripts in """ + ScriptsDirectory + """", LoggingLevel.Medium)
+
+      For Each scriptFile As VersionedScriptFile In orderedFilePaths
+
+        LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
+
+        Try
+          DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+        Catch ex As Exception
+          ThrowRunScriptException(ex, scriptFile.FilePath)
+        End Try
+
+        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+
+        LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
+
+        If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
+
+      Next
+
+    End If
+
+    Return latestVersion
+
+  End Function
+
+  ''' <summary>
+  ''' Runs the non-versioned scripts.
+  ''' </summary>
+  Private Sub RunOtherScripts()
+
+    If OtherDirectories IsNot Nothing Then
+
+      For Each otherDir As String In OtherDirectories
+
+        If Not String.IsNullOrEmpty(otherDir) Then
+
+          LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
+          For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
+
+            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+
+              LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
+
+              Try
+                DatabaseProvider.RunScript(IO.File.ReadAllText(filePath))
+              Catch ex As Exception
+                ThrowRunScriptException(ex, filePath)
+              End Try
+
+              LogMessage("Success", LoggingLevel.Verbose)
+
+            End If
+
+          Next
+
+        End If
+
+      Next
+
+    End If
+
+  End Sub
+
+  ''' <summary>
+  ''' Gets the version from file path.
+  ''' </summary>
+  ''' <param name="filePath">The file path.</param>
+  ''' <returns></returns>
   Private Function GetVersionFromFilePath(ByVal filePath As String) As Version
 
     Dim major As Int32 = 0
@@ -252,6 +279,11 @@
 
   End Function
 
+  ''' <summary>
+  ''' Gets a nicely formatted, very informational message about the SQL exception.
+  ''' </summary>
+  ''' <param name="sqlEx">The exception.</param>
+  ''' <returns></returns>
   Private Shared Function GetSqlExceptionString(ByVal sqlEx As SqlClient.SqlException) As String
 
     If sqlEx IsNot Nothing Then
@@ -267,6 +299,11 @@
 
   End Function
 
+  ''' <summary>
+  ''' Throws the run script exception. This method creates an ApplicationException with some information which will be useful to the user, then throws it.
+  ''' </summary>
+  ''' <param name="ex">The ex.</param>
+  ''' <param name="scriptFilePath">The script file path.</param>
   Private Shared Sub ThrowRunScriptException(ByVal ex As Exception, ByVal scriptFilePath As String)
 
     If TypeOf ex Is SqlClient.SqlException Then

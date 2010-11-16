@@ -28,7 +28,7 @@ Module Module1
     Else
 
       InitDbVersionManager()
-      dbVerMgr.Go()
+      dbVerMgr.Upgrade()
 
     End If
 
