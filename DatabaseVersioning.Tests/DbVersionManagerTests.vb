@@ -10,17 +10,18 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_DIR As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Scripts"
-  Private Const OTHER_DIR1 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Views"
-  Private Const OTHER_DIR2 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\Functions"
-  Private Const OTHER_DIR3 As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\StoredProcedures"
+  Private Const SCRIPTS_BASE_DIR As String = "C:\Users\bmontgomery\projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
+  Private scriptsDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Scripts")
+  Private otherDir1 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Views")
+  Private otherDir2 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Functions")
+  Private otherDir3 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "StoredProcedures")
 
   <SetUp()> _
   Public Sub SetupTest()
 
     mockery = New MockRepository()
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
-    dbVerMgr = New DbVersionManager(CONN_STR, DROP, SCRIPTS_DIR, OTHER_DIR1, OTHER_DIR2, OTHER_DIR3)
+    dbVerMgr = New DbVersionManager(CONN_STR, DROP, scriptsDir, otherDir1, otherDir2, otherDir3)
     dbVerMgr.DatabaseProvider = mockDbProvider
 
   End Sub
@@ -409,6 +410,11 @@ Public Class DbVersionManagerTests
     'Assert
     Assert.IsFalse(String.IsNullOrEmpty(dbVerMgr.ErrorMessage))
 
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_WithPatches_RunsAllPatches()
+    Throw New NotImplementedException()
   End Sub
 
 End Class
