@@ -32,6 +32,16 @@
     End Set
   End Property
 
+  Private mPatchesDirectory As String
+  Public Property PatchesDirectory() As String
+    Get
+      Return mPatchesDirectory
+    End Get
+    Set(ByVal value As String)
+      mPatchesDirectory = value
+    End Set
+  End Property
+
   Private mOtherDirectories As String()
   Public Property OtherDirectories() As String()
     Get
@@ -115,7 +125,7 @@
 
       End If
 
-      'Scripts first
+      'Scripts (inluding patches)
       Dim latestVersion As Version = RunVersionedScripts(currentDbVersion)
 
       'Other script directories
@@ -162,46 +172,81 @@
     Dim latestVersion As Version = currentDbVersion
     Dim versionedFiles As New List(Of VersionedScriptFile)
 
+    'find upgrade scripts
     If Not String.IsNullOrEmpty(ScriptsDirectory) Then
 
       LogMessage("Examining scripts directory for .sql files", LoggingLevel.Verbose)
-      For Each filePath As String In IO.Directory.GetFiles(ScriptsDirectory)
+      Dim upgradeScripts As List(Of VersionedScriptFile) = GetVersionedScripts(ScriptsDirectory)
 
-        If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+      Dim applicableScripts = From us As VersionedScriptFile In upgradeScripts Where us.Version > currentDbVersion
+      If applicableScripts IsNot Nothing Then
+        versionedFiles.AddRange(applicableScripts)
+      End If
 
-          Dim fileVersion As Version = GetVersionFromFilePath(filePath)
-          If fileVersion > currentDbVersion Then versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+    End If
 
-        End If
+    'find patch scripts
+    If Not String.IsNullOrEmpty(PatchesDirectory) Then
 
-      Next
+      LogMessage("Examining patches directory for .sql files", LoggingLevel.Verbose)
+      Dim patchScripts As List(Of VersionedScriptFile) = GetVersionedScripts(PatchesDirectory)
 
-      'Run the scripts in order
-      Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
-
-      LogMessage("Running scripts in """ + ScriptsDirectory + """", LoggingLevel.Medium)
-
-      For Each scriptFile As VersionedScriptFile In orderedFilePaths
-
-        LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
-
-        Try
-          DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
-        Catch ex As Exception
-          ThrowRunScriptException(ex, scriptFile.FilePath)
-        End Try
-
-        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
-
-        LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
-
-        If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
-
+      For Each patchScript As VersionedScriptFile In patchScripts
+        If Not DatabaseProvider.IsPatchApplied(patchScript.Version) Then versionedFiles.Add(patchScript)
       Next
 
     End If
 
+    'Run the scripts in order
+    Dim orderedFilePaths = From vf As VersionedScriptFile In versionedFiles Order By vf.Version Ascending
+
+    LogMessage("Running scripts in """ + ScriptsDirectory + """", LoggingLevel.Medium)
+
+    For Each scriptFile As VersionedScriptFile In orderedFilePaths
+
+      LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
+
+      Try
+        DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+      Catch ex As Exception
+        ThrowRunScriptException(ex, scriptFile.FilePath)
+      End Try
+
+      DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+
+      LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
+
+      If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
+
+    Next
+
     Return latestVersion
+
+  End Function
+
+  ''' <summary>
+  ''' Returns a list of VersionedScriptFile objects representing the versioned scripts found
+  ''' in the specified directory
+  ''' </summary>
+  ''' <param name="directory">The directory which contains versioned script files.</param>
+  ''' <returns></returns>
+  ''' <remarks></remarks>
+  Private Function GetVersionedScripts(ByVal directory As String) As List(Of VersionedScriptFile)
+
+    Dim versionedFiles As New List(Of VersionedScriptFile)
+
+    For Each filePath As String In IO.Directory.GetFiles(directory)
+
+      If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+
+        Dim fileVersion As Version = GetVersionFromFilePath(filePath)
+        versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
+
+      End If
+
+    Next
+
+    Return versionedFiles
 
   End Function
 

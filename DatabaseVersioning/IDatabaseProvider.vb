@@ -86,4 +86,13 @@
   ''' <returns></returns>
   Function UpdateVersion(ByVal scriptName As String, ByVal version As Version)
 
+  ''' <summary>
+  ''' This function is called when the manager needs to determine whether a patch script has been run
+  ''' on the database or not. After patch scripts are run, the PatchApplied function is called.
+  ''' </summary>
+  ''' <param name="patchVersion">The version of the patch script.</param>
+  ''' <returns></returns>
+  ''' <remarks></remarks>
+  Function IsPatchApplied(ByVal patchVersion As System.Version) As Boolean
+
 End Interface

@@ -15,6 +15,7 @@ Public Class DbVersionManagerTests
   Private otherDir1 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Views")
   Private otherDir2 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Functions")
   Private otherDir3 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "StoredProcedures")
+  Private patchesDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Patches")
 
   <SetUp()> _
   Public Sub SetupTest()
@@ -413,7 +414,54 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Upgrade_WithPatches_RunsAllPatches()
+  Public Sub Upgrade_WithPatchBeforeCurrentVersionAndNotPreviouslyRun_RunsPatch()
+
+    'if the patch hasn't been run yet, and the patch is before the current db version, 
+    'the patch needs to be run (at least at some point). there are more tests which 
+    'test more complex requirements.
+
+    'Arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.1"))
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_WithPatch_UpdatesVersionTable()
+    'after each patch is run, the VersionHistory table needs to be upgraded to record that the patch has been
+    'run so it is not run again in the future.
+    Throw New NotImplementedException()
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_WithPreviouslyRunPatch_DoesNotRunPatchScript()
+    'if the patch has already been run, it should not run again.
+    Throw New NotImplementedException()
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_WithPatchAndUpgradeScript_RunsScriptsInOrder()
+    'as scripts are run, the patches need to be run in order. i.e a 1.0.0.1 patch script cannot be run
+    'before a 1.0.0.0 script (whether it's patch or upgrade)
+    Throw New NotImplementedException()
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_WithPatchBehindCurrentVersion_RunsPatch()
+    'patch scripts need to be run even if they are behind the current version of the database
+    'i.e. if the db is at version 5.4.3.2, and a patch which is versioned at 4.5.0.1 is defined
+    '(and not yet run on the db), then the 4.5.0.1 patch needs to be run
     Throw New NotImplementedException()
   End Sub
 
