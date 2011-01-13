@@ -424,8 +424,8 @@ Public Class DbVersionManagerTests
     dbVerMgr.PatchesDirectory = patchesDir
 
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(False)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.1"))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.4"))
 
     mockery.ReplayAll()
 
@@ -447,8 +447,8 @@ Public Class DbVersionManagerTests
     dbVerMgr.PatchesDirectory = patchesDir
 
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(False)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.1.sql", New System.Version(1, 0, 0, 1)))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New System.Version(1, 0, 0, 4)))
 
     mockery.ReplayAll()
 
@@ -469,8 +469,9 @@ Public Class DbVersionManagerTests
     dbVerMgr.PatchesDirectory = patchesDir
 
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
-    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(True)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.1.sql", New System.Version(1, 0, 0, 1))).IgnoreArguments().Repeat.Never()
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(True)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.4")).Repeat.Never()
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New System.Version(1, 0, 0, 4))).IgnoreArguments().Repeat.Never()
 
     mockery.ReplayAll()
 
@@ -483,11 +484,34 @@ Public Class DbVersionManagerTests
   End Sub
 
   <Test()> _
-  Public Sub Upgrade_WithPatchAndUpgradeScript_RunsScriptsInOrder()
+  Public Sub Upgrade_WithPatchAndUpgradeScript_UpgradesDatabaseInOrder()
 
     'as scripts are run, the patches need to be run in order. i.e a 1.0.0.1 patch script cannot be run
     'before a 1.0.0.0 script (whether it's patch or upgrade)
-    Throw New NotImplementedException()
+
+    'Arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
+    Using mockery.Ordered()
+
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New Version(1, 0, 0, 4))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
+
+    End Using
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
 
   End Sub
 
