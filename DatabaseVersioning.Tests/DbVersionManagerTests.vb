@@ -464,15 +464,31 @@ Public Class DbVersionManagerTests
   Public Sub Upgrade_WithPreviouslyRunPatch_DoesNotRunPatchScript()
 
     'if the patch has already been run, it should not run again.
-    Throw New NotImplementedException()
+
+    'Arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(True)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.1.sql", New System.Version(1, 0, 0, 1))).IgnoreArguments().Repeat.Never()
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
 
   End Sub
 
   <Test()> _
   Public Sub Upgrade_WithPatchAndUpgradeScript_RunsScriptsInOrder()
+
     'as scripts are run, the patches need to be run in order. i.e a 1.0.0.1 patch script cannot be run
     'before a 1.0.0.0 script (whether it's patch or upgrade)
     Throw New NotImplementedException()
+
   End Sub
 
   <Test()> _
