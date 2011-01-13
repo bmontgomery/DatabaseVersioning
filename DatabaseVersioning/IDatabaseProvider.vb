@@ -82,14 +82,4 @@
   ''' <remarks></remarks>
   Function IsPatchApplied(ByVal patchVersion As System.Version) As Boolean
 
-  ''' <summary>
-  ''' Updates the datbase to reflect that this patch has been run. This method is
-  ''' only called after a patch script inside the patchScriptsDir is run. This method should use the
-  ''' transaction created in the BeginTransaction() method.
-  ''' </summary>
-  ''' <param name="scriptName">The file name of the patch script.</param>
-  ''' <param name="version">The version the database was patched to after the script was run.</param>
-  ''' <returns></returns>
-  Function PatchApplied(ByVal scriptName As String, ByVal version As Version)
-
 End Interface

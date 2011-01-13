@@ -22,7 +22,7 @@ Public Class DbVersionManagerTests
 
     mockery = New MockRepository()
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
-    dbVerMgr = New DbVersionManager(CONN_STR, DROP, scriptsDir, otherDir1, otherDir2, otherDir3)
+    dbVerMgr = New DbVersionManager(CONN_STR, DROP, scriptsDir, "", otherDir1, otherDir2, otherDir3)
     dbVerMgr.DatabaseProvider = mockDbProvider
 
   End Sub
@@ -126,56 +126,6 @@ Public Class DbVersionManagerTests
     mockery.VerifyAll()
 
   End Sub
-
-  '<Test()> _
-  'Public Sub Mgr_Upgrade_ChecksForDatabaseExistence()
-
-  '  'Arrange
-  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
-
-  '  mockery.ReplayAll()
-
-  '  'Action
-  '  dbVerMgr.Go()
-
-  '  'Assert
-  '  mockery.VerifyAll()
-
-  'End Sub
-
-  '<Test()> _
-  'Public Sub MgrUpgrade_NoDatabase_CreatesDatabase()
-
-  '  'Arrange
-  '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(False)
-  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Return(True)
-
-  '  mockery.ReplayAll()
-
-  '  'Action
-  '  dbVerMgr.Go()
-
-  '  'Assert
-  '  mockery.VerifyAll()
-
-  'End Sub
-
-  '<Test()> _
-  'Public Sub MgrUpgrade_DatabaseExists_DoesNotCreateDatabase()
-
-  '  'Arrange
-  '  mockDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
-  '  mockDbProvider.Expect(Function(p As IDatabaseProvider) p.CreateDatabase()).Repeat.Never()
-
-  '  mockery.ReplayAll()
-
-  '  'Action
-  '  dbVerMgr.Go()
-
-  '  'Assert
-  '  mockery.VerifyAll()
-
-  'End Sub
 
   <Test()> _
   Public Sub MgrUpgrade_DropAllTrue_DropsAllItems()
@@ -374,7 +324,6 @@ Public Class DbVersionManagerTests
     dbVerMgr.DatabaseProvider = strictDbProvider
 
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.OpenDatabaseConnection(CONN_STR)).Return(True)
-    'strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DatabaseExists()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.BeginTransaction()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.DropItems()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(1, 0, 0, 3))
@@ -382,7 +331,7 @@ Public Class DbVersionManagerTests
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CommitTransaction()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
-
+    
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
 
@@ -448,7 +397,7 @@ Public Class DbVersionManagerTests
 
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(False)
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New System.Version(1, 0, 0, 4)))
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.4.sql", New System.Version(1, 0, 0, 4)))
 
     mockery.ReplayAll()
 
@@ -471,7 +420,7 @@ Public Class DbVersionManagerTests
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(True)
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.4")).Repeat.Never()
-    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New System.Version(1, 0, 0, 4))).IgnoreArguments().Repeat.Never()
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.4.sql", New System.Version(1, 0, 0, 4))).Repeat.Never()
 
     mockery.ReplayAll()
 
@@ -499,7 +448,7 @@ Public Class DbVersionManagerTests
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
-      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.4.sql", New Version(1, 0, 0, 4))).Return(True)
+      mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.4.sql", New Version(1, 0, 0, 4))).Return(True)
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
       mockDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
 

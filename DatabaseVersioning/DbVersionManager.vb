@@ -85,19 +85,20 @@
 #End Region
 
   Public Enum LoggingLevel
-    Verbose
-    Medium
-    ErrorsOnly
-    Off
+    Verbose = 3
+    Medium = 2
+    ErrorsOnly = 1
+    Off = 0
   End Enum
 
   Public Event MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
 
-  Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal ParamArray otherDirs As String())
+  Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal patchesDir As String, ByVal ParamArray otherDirs As String())
 
     mConnectionString = connectionString
     mDrop = drop
     mScriptsDirectory = scriptsDir
+    mPatchesDirectory = patchesDir
     mOtherDirectories = otherDirs
 
   End Sub
@@ -217,12 +218,7 @@
         ThrowRunScriptException(ex, scriptFile.FilePath)
       End Try
 
-      'if it's a patch, update the database to reflect that the patch has been applied
-      If scriptFile.IsPatch Then
-        DatabaseProvider.PatchApplied(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
-      Else
-        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
-      End If
+      DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
 
       LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
 

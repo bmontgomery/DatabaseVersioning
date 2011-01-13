@@ -193,33 +193,30 @@ Public Class MsSqlDatabaseProvider
 
   Public Function IsPatchApplied(ByVal patchVersion As System.Version) As Boolean Implements IDatabaseProvider.IsPatchApplied
 
-    Throw New NotImplementedException()
+    'if necessary, load up a hashset of all versions
+    If versions Is Nothing Then
 
-    'if necessary,
-    'If versions Is Nothing Then
+      versions = New HashSet(Of Version)
 
-    '  versions = New HashSet(Of Version)
+      Dim getVersionsCommand As New SqlCommand( _
+        "select VH_Major, VH_Minor, VH_Build, VH_Revision from VersionHistory;", _
+        connection, _
+        transaction)
+      Using dataReader As IDataReader = getVersionsCommand.ExecuteReader(System.Data.CommandBehavior.CloseConnection)
 
-    '  Dim getVersionsCommand As New SqlCommand( _
-    '    "select VH_Major, VH_Minor, VH_Build, VH_Revision from VersionHistory;", _
-    '    connection, _
-    '    transaction)
-    '  Using dataReader As IDataReader = getVersionsCommand.ExecuteReader(System.Data.CommandBehavior.CloseConnection)
+        While dataReader.Read()
 
-    '    While dataReader.Read()
+          Dim scriptVersion As New Version(dataReader("VH_Major"), dataReader("VH_Minor"), dataReader("VH_Build"), dataReader("VH_Revision"))
+          versions.Add(scriptVersion)
 
-    '      Dim scriptVersion As New Version(dataReader("VH_Major"), dataReader("VH_Minor"), dataReader("VH_Build"), dataReader("VH_Revision"))
-    '      versions.Add(scriptVersion)
+        End While
 
-    '    End While
+      End Using
 
-    '  End Using
-
-    'End If
-
-    'load up a dictionary of all versions
+    End If
 
     'check the dictionary for the specified version
+    Return versions.Contains(patchVersion)
 
   End Function
 
@@ -244,9 +241,5 @@ Public Class MsSqlDatabaseProvider
     GC.SuppressFinalize(Me)
   End Sub
 #End Region
-
-  Public Function PatchApplied(ByVal scriptName As String, ByVal version As System.Version) As Object Implements IDatabaseProvider.PatchApplied
-    Throw New NotImplementedException()
-  End Function
 
 End Class
