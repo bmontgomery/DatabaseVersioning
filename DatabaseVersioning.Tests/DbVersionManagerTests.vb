@@ -517,10 +517,26 @@ Public Class DbVersionManagerTests
 
   <Test()> _
   Public Sub Upgrade_WithPatchBehindCurrentVersion_RunsPatch()
+
     'patch scripts need to be run even if they are behind the current version of the database
     'i.e. if the db is at version 5.4.3.2, and a patch which is versioned at 4.5.0.1 is defined
     '(and not yet run on the db), then the 4.5.0.1 patch needs to be run
-    Throw New NotImplementedException()
+
+    'Arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(2, 0, 0, 0))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.4"))
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
 End Class
