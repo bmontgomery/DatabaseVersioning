@@ -10,7 +10,7 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_BASE_DIR As String = "C:\Users\bmontgomery\projects\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
+  Private Const SCRIPTS_BASE_DIR As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
   Private scriptsDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Scripts")
   Private otherDir1 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Views")
   Private otherDir2 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Functions")
@@ -439,15 +439,33 @@ Public Class DbVersionManagerTests
 
   <Test()> _
   Public Sub Upgrade_WithPatch_UpdatesVersionTable()
+
     'after each patch is run, the VersionHistory table needs to be upgraded to record that the patch has been
     'run so it is not run again in the future.
-    Throw New NotImplementedException()
+
+    'Arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 1))).Return(False)
+    mockDbProvider.Expect(Function(p As IDatabaseProvider) p.PatchApplied("1.0.0.1.sql", New System.Version(1, 0, 0, 1)))
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
+
   End Sub
 
   <Test()> _
   Public Sub Upgrade_WithPreviouslyRunPatch_DoesNotRunPatchScript()
+
     'if the patch has already been run, it should not run again.
     Throw New NotImplementedException()
+
   End Sub
 
   <Test()> _

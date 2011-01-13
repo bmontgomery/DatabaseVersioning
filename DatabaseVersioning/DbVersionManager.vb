@@ -192,7 +192,12 @@
       Dim patchScripts As List(Of VersionedScriptFile) = GetVersionedScripts(PatchesDirectory)
 
       For Each patchScript As VersionedScriptFile In patchScripts
-        If Not DatabaseProvider.IsPatchApplied(patchScript.Version) Then versionedFiles.Add(patchScript)
+        If Not DatabaseProvider.IsPatchApplied(patchScript.Version) Then
+
+          patchScript.IsPatch = True
+          versionedFiles.Add(patchScript)
+
+        End If
       Next
 
     End If
@@ -212,7 +217,12 @@
         ThrowRunScriptException(ex, scriptFile.FilePath)
       End Try
 
-      DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+      'if it's a patch, update the database to reflect that the patch has been applied
+      If scriptFile.IsPatch Then
+        DatabaseProvider.PatchApplied(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+      Else
+        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+      End If
 
       LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
 
