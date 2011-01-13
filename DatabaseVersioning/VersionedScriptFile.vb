@@ -20,6 +20,16 @@
     End Set
   End Property
 
+  Private mIsPatch As Boolean
+  Public Property IsPatch() As Boolean
+    Get
+      Return mIsPatch
+    End Get
+    Set(ByVal value As Boolean)
+      mIsPatch = value
+    End Set
+  End Property
+
   Public Sub New(ByVal version As Version, ByVal filePath As String)
 
     mVersion = version

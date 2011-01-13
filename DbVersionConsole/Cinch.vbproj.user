@@ -1,5 +1,5 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <StartArguments>-connStr "Server=.\SQLEXPRESS;Database=Upgradable;Trusted_Connection=True;" -scripts "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\Scripts" -other "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\StoredProcs" -drop</StartArguments>
+    <StartArguments>-connStr "Server=.\SQLEXPRESS;Database=Upgradable;Trusted_Connection=True;" -scripts "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\Scripts" -patches "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\Patches" -other "C:\Source Code\DatabaseVersioning\DbVersionConsole\TestData\StoredProcs" -drop</StartArguments>
   </PropertyGroup>
 </Project>

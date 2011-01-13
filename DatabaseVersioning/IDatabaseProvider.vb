@@ -35,19 +35,6 @@
   ''' <returns></returns>
   Function CommitTransaction()
 
-  '''' <summary>
-  '''' Checks for the existance of the database. Returns true if the database exists;
-  '''' otherwise false.
-  '''' </summary>
-  '''' <returns></returns>
-  'Function DatabaseExists() As Boolean
-
-  '''' <summary>
-  '''' Creates the database.
-  '''' </summary>
-  '''' <returns></returns>
-  'Function CreateDatabase()
-
   ''' <summary>
   ''' Ensures the version history table exists. If the version history table does not
   ''' exist, this method should created the necessary version history table.
@@ -85,5 +72,14 @@
   ''' <param name="version">The version the database was upgraded to after the script was run.</param>
   ''' <returns></returns>
   Function UpdateVersion(ByVal scriptName As String, ByVal version As Version)
+
+  ''' <summary>
+  ''' This function is called when the manager needs to determine whether a patch script has been run
+  ''' on the database or not. After patch scripts are run, the PatchApplied function is called.
+  ''' </summary>
+  ''' <param name="patchVersion">The version of the patch script.</param>
+  ''' <returns></returns>
+  ''' <remarks></remarks>
+  Function IsPatchApplied(ByVal patchVersion As System.Version) As Boolean
 
 End Interface
