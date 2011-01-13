@@ -19,14 +19,6 @@ Public Class MsSqlDatabaseProvider
     transaction.Commit()
   End Function
 
-  'Public Function CreateDatabase() As Object Implements IDatabaseProvider.CreateDatabase
-
-  'End Function
-
-  'Public Function DatabaseExists() As Boolean Implements IDatabaseProvider.DatabaseExists
-  '  Return True
-  'End Function
-
   Public Function DropItems() As Object Implements IDatabaseProvider.DropItems
 
     Dim sql As New Text.StringBuilder()
