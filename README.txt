@@ -30,6 +30,6 @@ Database Versioning
 ---
 Every time the tool runs a script, it creates a record in a "VersionHistory" table in the database. This keeps track of every script which has been run, and this is the table the tool uses to determine the version of the database.
 
-Architecture
+Project Structure and Architecture
 ===
-The code is organized in such a way as to provide the ability to use dependency injection to potentially version any database. A Microsoft SQL Server implementation has been written.
+The core of the update logic is contained in the DatabaseVersioning project. The DbVersionConsole project, which produces cinch.exe, the command line tool, simply provides a command-line interface to use the DatabaseVersioning logic. The code is organized in such a way as to provide the ability to use dependency injection to potentially version any database. A Microsoft SQL Server implementation has been written.
