@@ -5,7 +5,7 @@ Public Class MsSqlDatabaseProvider
 
   Private connection As SqlConnection
   Private transaction As SqlTransaction
-  Private versions As New HashSet(Of Version)
+  Private versions As HashSet(Of Version)
 
   Public Function BeginTransaction() As Object Implements IDatabaseProvider.BeginTransaction
     transaction = connection.BeginTransaction()
@@ -202,7 +202,7 @@ Public Class MsSqlDatabaseProvider
         "select VH_Major, VH_Minor, VH_Build, VH_Revision from VersionHistory;", _
         connection, _
         transaction)
-      Using dataReader As IDataReader = getVersionsCommand.ExecuteReader(System.Data.CommandBehavior.CloseConnection)
+      Using dataReader As IDataReader = getVersionsCommand.ExecuteReader()
 
         While dataReader.Read()
 
