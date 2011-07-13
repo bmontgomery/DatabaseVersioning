@@ -13,7 +13,6 @@ Module Module1
   Private Const OTHER_KEY As String = "other"
   Private Const HELP_ARG As String = "help"
   Private Const DEBUG_ARG As String = "debug"
-  Private Const UPGRADE_VERSION_ARG As String = "to"
 
   Private validArgs As New HashSet(Of String)()
   Private args As New Dictionary(Of String, String)
@@ -157,29 +156,9 @@ Module Module1
 
     End If
 
-    If args.ContainsKey(UPGRADE_VERSION_ARG) Then
-
-      Dim upgradeToVersion As Version = Nothing
-      If TryParseVersion(args(UPGRADE_VERSION_ARG), upgradeToVersion) Then
-        dbVerMgr.UpgradeToVersion = upgradeToVersion
-      End If
-
-    End If
-
     AddHandler dbVerMgr.MessageLogged, AddressOf MessageLogged
 
   End Sub
-
-  Public Function TryParseVersion(input As String, output As Version) As Boolean
-    Try
-
-      output = New Version(input)
-      Return True
-
-    Catch
-      Return False
-    End Try
-  End Function
 
   Private Sub PrintHelp()
 
