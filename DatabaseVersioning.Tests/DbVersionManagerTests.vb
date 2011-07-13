@@ -10,7 +10,7 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_BASE_DIR As String = "C:\Source Code\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
+  Private Const SCRIPTS_BASE_DIR As String = "C:\source\other\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
   Private scriptsDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Scripts")
   Private otherDir1 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Views")
   Private otherDir2 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Functions")
@@ -477,6 +477,38 @@ Public Class DbVersionManagerTests
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(2, 0, 0, 0))
     mockDbProvider.Stub(Function(p As IDatabaseProvider) p.IsPatchApplied(New System.Version(1, 0, 0, 4))).Return(False)
     mockDbProvider.Expect(Function(p As IDatabaseProvider) p.RunScript("--patch script 1.0.0.4"))
+
+    mockery.ReplayAll()
+
+    'Action
+    dbVerMgr.Upgrade()
+
+    'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()> _
+  Public Sub Upgrade_ToSpecificVersion_RunsCorrectScripts()
+
+    'Arrange
+    Dim DbProvider = mockery.StrictMock(Of IDatabaseProvider)()
+    DbProvider.Stub(Function(p) p.OpenDatabaseConnection("")).IgnoreArguments()
+    DbProvider.Stub(Function(p) p.BeginTransaction()).Return(Nothing)
+    DbProvider.Stub(Function(p) p.DropItems()).Return(Nothing)
+    DbProvider.Stub(Function(p) p.CloseDatabaseConnection()).Return(Nothing)
+    DbProvider.Stub(Function(p) p.EnsureVersionHistoryTableExists()).Return(Nothing)
+    DbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    DbProvider.Stub(Function(p) p.RunScript("")).IgnoreArguments().Return(Nothing)
+    DbProvider.Stub(Function(p) p.RollBackTransaction()).Return(Nothing)
+    DbProvider.Stub(Function(p) p.CommitTransaction()).Return(Nothing)
+
+    DbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
+    DbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
+    DbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
+
+    dbVerMgr.UpgradeToVersion = New Version(1, 0, 0, 3)
+    dbVerMgr.DatabaseProvider = DbProvider
 
     mockery.ReplayAll()
 

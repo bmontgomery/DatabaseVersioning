@@ -82,6 +82,8 @@
     End Set
   End Property
 
+  Public Property UpgradeToVersion As Version
+
 #End Region
 
   Public Enum LoggingLevel
@@ -210,19 +212,23 @@
 
     For Each scriptFile As VersionedScriptFile In orderedFilePaths
 
-      LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
+      If UpgradeToVersion Is Nothing OrElse scriptFile.Version <= UpgradeToVersion Then
 
-      Try
-        DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
-      Catch ex As Exception
-        ThrowRunScriptException(ex, scriptFile.FilePath)
-      End Try
+        LogMessage("Running script """ + IO.Path.GetFileName(scriptFile.FilePath) + """", LoggingLevel.Verbose)
 
-      DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
+        Try
+          DatabaseProvider.RunScript(IO.File.ReadAllText(scriptFile.FilePath))
+        Catch ex As Exception
+          ThrowRunScriptException(ex, scriptFile.FilePath)
+        End Try
 
-      LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
+        DatabaseProvider.UpdateVersion(IO.Path.GetFileName(scriptFile.FilePath), scriptFile.Version)
 
-      If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
+        LogMessage("Database succesfully upgraded to version """ + scriptFile.Version.ToString() + """", LoggingLevel.Verbose)
+
+        If latestVersion Is Nothing OrElse scriptFile.Version > latestVersion Then latestVersion = scriptFile.Version
+
+      End If
 
     Next
 
