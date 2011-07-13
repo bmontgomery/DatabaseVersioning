@@ -12,26 +12,35 @@ Module Module1
   Private Const LOG_LEVEL_ARG As String = "l"
   Private Const OTHER_KEY As String = "other"
   Private Const HELP_ARG As String = "help"
-
+  
   Private validArgs As New HashSet(Of String)()
   Private args As New Dictionary(Of String, String)
   Private dbVerMgr As DbVersionManager
 
   Sub Main()
 
-    WriteInfo()
+    Try
 
-    GenerateCommandLineArgDefinitions()
-    ParseCommandLineArgs()
+      WriteInfo()
 
-    If args.ContainsKey(HELP_ARG) Then
-      PrintHelp()
-    Else
+      GenerateCommandLineArgDefinitions()
+      ParseCommandLineArgs()
 
-      InitDbVersionManager()
-      dbVerMgr.Upgrade()
+      If args.ContainsKey(HELP_ARG) Then
+        PrintHelp()
+      Else
 
-    End If
+        InitDbVersionManager()
+        dbVerMgr.Upgrade()
+
+      End If
+
+    Catch ex As Exception
+
+      Console.WriteLine(ex.Message)
+      Console.WriteLine(ex.StackTrace)
+
+    End Try
 
   End Sub
 
