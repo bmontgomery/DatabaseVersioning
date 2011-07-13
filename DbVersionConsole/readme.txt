@@ -48,5 +48,11 @@ Options
                                     versioned patch files. The tool will ensure
                                     each script in this directory has been run,
                                     regardless of the version of the database.
+
+-to <version>                       Upgrade the database to a specific version.
+                                    When this option is used, the tool will only
+                                    run scripts between the database's current
+                                    version and the version specified (inclusive
+                                    of the version specified).
                                     
 -help                               Display this help information.
