@@ -8,6 +8,7 @@ Module Module1
   Private Const CONN_STR_ARG As String = "connStr"
   Private Const DROP_ARG As String = "drop"
   Private Const SCRIPTS_DIR_ARG As String = "scripts"
+  Private Const SEEDS_DIR_ARG As String = "seeds"
   Private Const PATCHES_DIR_ARG As String = "patches"
   Private Const LOG_LEVEL_ARG As String = "l"
   Private Const OTHER_KEY As String = "other"
@@ -72,6 +73,7 @@ Module Module1
     validArgs.Add(CONN_STR_ARG)
     validArgs.Add(DROP_ARG)
     validArgs.Add(SCRIPTS_DIR_ARG)
+    validArgs.Add(SEEDS_DIR_ARG)
     validArgs.Add(PATCHES_DIR_ARG)
     validArgs.Add(OTHER_KEY)
     validArgs.Add(LOG_LEVEL_ARG)
@@ -111,6 +113,7 @@ Module Module1
     Dim connStr As String = String.Empty
     Dim drop As Boolean = False
     Dim scriptsDir As String = String.Empty
+    Dim seedsDir As String = String.Empty
     Dim patchesDir As String = String.Empty
     Dim otherDirs As String() = Nothing
 
@@ -128,11 +131,15 @@ Module Module1
       patchesDir = args(PATCHES_DIR_ARG)
     End If
 
+    If args.ContainsKey(SEEDS_DIR_ARG) Then
+      seedsDir = args(SEEDS_DIR_ARG)
+    End If
+
     If args.ContainsKey(OTHER_KEY) Then
       otherDirs = args(OTHER_KEY).Split(",")
     End If
 
-    dbVerMgr = New DbVersionManager(connStr, drop, scriptsDir, patchesDir, otherDirs)
+    dbVerMgr = New DbVersionManager(connStr, drop, scriptsDir, patchesDir, seedsDir, otherDirs)
     dbVerMgr.DatabaseProvider = New MsSqlDatabaseProvider()
     dbVerMgr.LogLevel = DbVersionManager.LoggingLevel.Medium
 
