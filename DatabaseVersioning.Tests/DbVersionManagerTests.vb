@@ -10,19 +10,20 @@ Public Class DbVersionManagerTests
 
   Private Const CONN_STR As String = "server=.\SQLEXPRESS;database=Test"
   Private Const DROP As Boolean = True
-  Private Const SCRIPTS_BASE_DIR As String = "C:\source\other\DatabaseVersioning\DatabaseVersioning.Tests\TestData\"
+  Private Const SCRIPTS_BASE_DIR As String = "C:\source\other\autoupgrade-poc\DatabaseVersioning\DatabaseVersioning.Tests\TestData"
   Private scriptsDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Scripts")
   Private otherDir1 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Views")
   Private otherDir2 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Functions")
   Private otherDir3 As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "StoredProcedures")
   Private patchesDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Patches")
+  Private seedsDir As String = IO.Path.Combine(SCRIPTS_BASE_DIR, "Seeds")
 
   <SetUp()> _
   Public Sub SetupTest()
 
     mockery = New MockRepository()
     mockDbProvider = mockery.DynamicMock(Of IDatabaseProvider)()
-    dbVerMgr = New DbVersionManager(CONN_STR, DROP, scriptsDir, "", otherDir1, otherDir2, otherDir3)
+    dbVerMgr = New DbVersionManager(CONN_STR, DROP, scriptsDir, "", "", {otherDir1, otherDir2, otherDir3})
     dbVerMgr.DatabaseProvider = mockDbProvider
 
   End Sub
@@ -331,7 +332,7 @@ Public Class DbVersionManagerTests
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.RunScript("")).IgnoreArguments().Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CommitTransaction()).Return(True)
     strictDbProvider.Stub(Function(p As IDatabaseProvider) p.CloseDatabaseConnection()).Return(True)
-    
+
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
     strictDbProvider.Expect(Function(p As IDatabaseProvider) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
 
@@ -516,6 +517,83 @@ Public Class DbVersionManagerTests
     dbVerMgr.Upgrade()
 
     'Assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()>
+  Public Sub Upgrade_WithSeedScripts_RunsSeedScripts()
+
+    'arrange
+    dbVerMgr.SeedsDirectory = seedsDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+    mockDbProvider.Expect(Function(p) p.RunScript("--permissions go here")).Return(True)
+    mockDbProvider.Expect(Function(p) p.RunScript("--users go here")).Return(True)
+
+    mockery.ReplayAll()
+
+    'action
+    dbVerMgr.Upgrade()
+
+    'assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()>
+  Public Sub Upgrade_WithSeedScripts_RunsSeedScriptsInOrder()
+
+    'arrange
+    dbVerMgr.SeedsDirectory = seedsDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
+    Using mockery.Ordered()
+
+      mockDbProvider.Expect(Function(p) p.RunScript("--permissions go here")).Return(True)
+      mockDbProvider.Expect(Function(p) p.RunScript("--users go here")).Return(True)
+
+    End Using
+
+    mockery.ReplayAll()
+
+    'action
+    dbVerMgr.Upgrade()
+
+    'assert
+    mockery.VerifyAll()
+
+  End Sub
+
+  <Test()>
+  Public Sub Upgrade_WithSeedScripts_RunsSeedScriptsAfterUpgradeScripts()
+
+    'arrange
+    dbVerMgr.PatchesDirectory = patchesDir
+    dbVerMgr.SeedsDirectory = seedsDir
+
+    mockDbProvider.Stub(Function(p As IDatabaseProvider) p.GetDatabaseVersion()).Return(New Version(0, 0, 0, 0))
+
+    Using mockery.Ordered()
+
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("1.0.0.0.sql", New Version(1, 0, 0, 0))).Return(True)
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("1.0.0.2.sql", New Version(1, 0, 0, 2))).Return(True)
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("01.00.0.003.sql", New Version(1, 0, 0, 3))).Return(True)
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("1.0.0.4.sql", New Version(1, 0, 0, 4))).Return(True)
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("1.0.1.0.sql", New Version(1, 0, 1, 0))).Return(True)
+      mockDbProvider.Expect(Function(p) p.UpdateVersion("01.2.0.0.sql", New Version(1, 2, 0, 0))).Return(True)
+      mockDbProvider.Expect(Function(p) p.RunScript("--permissions go here")).Return(True)
+      mockDbProvider.Expect(Function(p) p.RunScript("--users go here")).Return(True)
+
+    End Using
+
+    mockery.ReplayAll()
+
+    'action
+    dbVerMgr.Upgrade()
+
+    'assert
     mockery.VerifyAll()
 
   End Sub

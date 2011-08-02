@@ -1,5 +1,7 @@
 ﻿Public Class DbVersionManager
 
+  Private mSqlScriptRegEx As New Text.RegularExpressions.Regex(".*\.sql$", Text.RegularExpressions.RegexOptions.IgnoreCase Or Text.RegularExpressions.RegexOptions.Compiled)
+
 #Region "Properties"
 
   Private mConnectionString As String
@@ -31,6 +33,8 @@
       mScriptsDirectory = value
     End Set
   End Property
+
+  Public Property SeedsDirectory As String
 
   Private mPatchesDirectory As String
   Public Property PatchesDirectory() As String
@@ -95,12 +99,13 @@
 
   Public Event MessageLogged(ByVal sender As Object, ByVal e As MessageLoggedEventArgs)
 
-  Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal patchesDir As String, ByVal ParamArray otherDirs As String())
+  Public Sub New(ByVal connectionString As String, ByVal drop As Boolean, ByVal scriptsDir As String, ByVal patchesDir As String, seedsDir As String, ByVal otherDirs As String())
 
     mConnectionString = connectionString
     mDrop = drop
     mScriptsDirectory = scriptsDir
     mPatchesDirectory = patchesDir
+    Me.SeedsDirectory = seedsDir
     mOtherDirectories = otherDirs
 
   End Sub
@@ -130,6 +135,9 @@
 
       'Scripts (inluding patches)
       Dim latestVersion As Version = RunVersionedScripts(currentDbVersion)
+
+      'seed scripts
+      RunSeedScripts()
 
       'Other script directories
       RunOtherScripts()
@@ -249,7 +257,7 @@
 
     For Each filePath As String In IO.Directory.GetFiles(directory)
 
-      If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+      If mSqlScriptRegEx.IsMatch(filePath) Then
 
         Dim fileVersion As Version = GetVersionFromFilePath(filePath)
         versionedFiles.Add(New VersionedScriptFile(fileVersion, filePath))
@@ -259,6 +267,40 @@
     Next
 
     Return versionedFiles
+
+  End Function
+
+  Private Function RunSeedScripts()
+
+    If Not String.IsNullOrWhiteSpace(SeedsDirectory) Then
+
+      LogMessage("Examining seeds directory for .sql files", LoggingLevel.Verbose)
+
+      'get list of seed scripts in alpha order
+      Dim files = IO.Directory.GetFiles(SeedsDirectory)
+      Array.Sort(files)
+
+      LogMessage("Running scripts in """ + SeedsDirectory + """", LoggingLevel.Medium)
+
+      For Each scriptPath In files
+
+        If mSqlScriptRegEx.IsMatch(scriptPath) Then
+
+          LogMessage("Running script """ + scriptPath + """", LoggingLevel.Verbose)
+
+          Try
+            DatabaseProvider.RunScript(IO.File.ReadAllText(scriptPath))
+          Catch ex As Exception
+            ThrowRunScriptException(ex, scriptPath)
+          End Try
+
+          LogMessage("Success", LoggingLevel.Verbose)
+
+        End If
+
+      Next
+
+    End If
 
   End Function
 
@@ -276,7 +318,7 @@
           LogMessage("Running scripts in """ + otherDir + """", LoggingLevel.Medium)
           For Each filePath As String In IO.Directory.GetFiles(otherDir, "*.sql")
 
-            If Text.RegularExpressions.Regex.IsMatch(filePath, ".*\.sql$") Then
+            If mSqlScriptRegEx.IsMatch(filePath) Then
 
               LogMessage("Running other script """ + IO.Path.GetFileName(filePath) + """", LoggingLevel.Verbose)
 
