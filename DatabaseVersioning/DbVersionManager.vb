@@ -34,6 +34,14 @@
     End Set
   End Property
 
+  ''' <summary>
+  ''' Gets or sets the seeds directory. The scripts in the seeds directory
+  ''' are run in alphabetical order after the ugprade and patch scripts are run, and
+  ''' before the other scripts are run.
+  ''' </summary>
+  ''' <value>
+  ''' The seeds directory.
+  ''' </value>
   Public Property SeedsDirectory As String
 
   Private mPatchesDirectory As String
@@ -86,6 +94,13 @@
     End Set
   End Property
 
+  ''' <summary>
+  ''' Gets or sets a value indicating whether or not to use a transaction for the upgrade scripts.
+  ''' Defaults to true.
+  ''' </summary>
+  ''' <value>
+  '''   <c>true</c> to use a transaction; otherwise, <c>false</c>.
+  ''' </value>
   Public Property UseTransaction As Boolean = True
 
   Public Property UpgradeToVersion As Version
