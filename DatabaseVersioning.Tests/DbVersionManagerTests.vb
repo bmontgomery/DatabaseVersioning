@@ -598,4 +598,21 @@ Public Class DbVersionManagerTests
 
   End Sub
 
+  <Test()>
+  Public Sub Upgrade_WithNoTransaction_DoesNotBeginTransaction()
+
+    'arrange
+    dbVerMgr.UseTransaction = False
+    mockDbProvider.Expect(Function(p) p.BeginTransaction()).Repeat.Never()
+
+    mockery.ReplayAll()
+
+    'action
+    dbVerMgr.Upgrade()
+
+    'assert
+    mockery.VerifyAll()
+
+  End Sub
+
 End Class

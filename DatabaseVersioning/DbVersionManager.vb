@@ -86,6 +86,8 @@
     End Set
   End Property
 
+  Public Property UseTransaction As Boolean = True
+
   Public Property UpgradeToVersion As Version
 
 #End Region
@@ -115,8 +117,12 @@
     LogMessage("Opening database connection", LoggingLevel.Verbose)
     DatabaseProvider.OpenDatabaseConnection(mConnectionString)
 
-    LogMessage("Beginning transaction", LoggingLevel.Verbose)
-    DatabaseProvider.BeginTransaction()
+    If UseTransaction Then
+
+      LogMessage("Beginning transaction", LoggingLevel.Verbose)
+      DatabaseProvider.BeginTransaction()
+
+    End If
 
     Try
 
@@ -142,16 +148,20 @@
       'Other script directories
       RunOtherScripts()
 
-      LogMessage("Committing transaction", LoggingLevel.Verbose)
-      DatabaseProvider.CommitTransaction()
-      LogMessage("Transaction committed", LoggingLevel.Verbose)
+      If UseTransaction Then
+
+        LogMessage("Committing transaction", LoggingLevel.Verbose)
+        DatabaseProvider.CommitTransaction()
+        LogMessage("Transaction committed", LoggingLevel.Verbose)
+
+      End If
 
       LogMessage("Database upgraded to version " + latestVersion.ToString() + " successfully.", LoggingLevel.Medium)
 
     Catch ex As Exception
 
       LogMessage("Error: " + ex.Message, LoggingLevel.ErrorsOnly)
-      DatabaseProvider.RollBackTransaction()
+      If UseTransaction Then DatabaseProvider.RollBackTransaction()
       mErrorMessage = ex.Message
 
     Finally
